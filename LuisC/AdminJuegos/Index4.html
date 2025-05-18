@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Administración de Juegos</title>
+  <link rel="stylesheet" href="./req18.css" />
+  <script src="./req18.js" defer></script>
+</head>
+<body>
+  <aside class="sidebar">
+    <p>Jon Shmoe</p>
+    <nav>
+      <button>Users</button>
+      <button class="active">Games</button>
+      <button>News</button>
+      <button>Statistics</button>
+      <button>Log out</button>
+    </nav>
+  </aside>
+
+  <main class="admin-panel">
+    <h2>Games</h2>
+    <div class="actions">
+      <button id="filterBtn">Filter</button>
+      <button id="addBtn">+ Add</button>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Photo</th>
+          <th>Category</th>
+          <th>Name</th>
+          <th>Base price</th>
+          <th>Discount</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="gameTableBody">
+        <!-- JS insertará las filas -->
+      </tbody>
+    </table>
+  </main>
+
+  <!-- Modal para confirmar eliminación -->
+  <div class="modal" id="deleteModal">
+    <div class="modal-content">
+      <h3>Delete game</h3>
+      <p>Are you sure that you want to delete this register?</p>
+      <div class="modal-buttons">
+        <button onclick="closeModal()">Cancelar</button>
+        <button onclick="confirmDelete()">Submit</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Agregar/Editar -->
+  <div class="modal" id="gameFormModal">
+    <div class="modal-content">
+      <h3 id="form-title">Add game</h3>
+      <form id="gameForm">
+        <input type="text" id="gameName" placeholder="Name" required />
+        <textarea id="gameDesc" placeholder="Description"></textarea>
+        <select id="gameCategory" required>
+          <option value="">Select category</option>
+          <option value="Action">Action</option>
+          <option value="RPG">RPG</option>
+          <option value="Horror">Horror</option>
+          <option value="Shooter">Shooter</option>
+        </select>
+        <input type="number" id="gamePrice" placeholder="Price" required />
+        <input type="number" id="gameDiscount" placeholder="Discount (%)" required />
+        <input type="text" id="gamePhoto" placeholder="Photo URL" required />
+        <div class="modal-buttons">
+          <button type="button" onclick="closeForm()">Cancel</button>
+          <button type="submit">Submit</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</body>
+</html>
