@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Marketplace de Videojuegos</title>
+  <link rel="stylesheet" href="./req10.css" />
+  <script src="./req10.js" defer></script>
+</head>
+<body>
+  <nav class="navbar">
+    <button>Explore</button>
+    <button>Categories</button>
+    <button>Home</button>
+    <button>Platform</button>
+    <button>Special Offers</button>
+    <div class="nav-icons">
+      <span>👤</span>
+      <input type="text" placeholder="Search..." />
+    </div>
+  </nav>
+
+  <section class="carousel">
+    <button class="carousel-btn">⬅</button>
+    <div class="carousel-image">
+      <p>Video Game Carousel</p>
+      <button>Details</button>
+    </div>
+    <button class="carousel-btn">➡</button>
+  </section>
+
+  <section class="featured">
+    <h2>Featured Games</h2>
+    <div class="games-list" id="catalogo"></div>
+  </section>
+
+  <section class="cart">
+    <h3>🛒 Shopping Cart (<span id="carrito-contador">0</span>)</h3>
+    <div id="cart-items"></div>
+    <div class="cart-actions">
+      <button id="confirmar">✔ Confirm Order</button>
+      <button id="cancelar">✖ Cancel Order</button>
+    </div>
+  </section>
+
+
+  <div id="order-modal" class="modal">
+    <div class="modal-content">
+      <span id="close-modal" class="close">X</span>
+      <h2>Confirm Order</h2>
+      <label for="full-name">Full Name:</label>
+      <input type="text" id="full-name" />
+
+      <label for="address">Address:</label>
+      <input type="text" id="address" />
+
+      <label for="card-number">Card Number:</label>
+      <input type="text" id="card-number" />
+
+      <label for="cvc">CVC:</label>
+      <input type="text" id="cvc" />
+
+      <label for="expiration-date">Expiration Date:</label>
+      <input type="text" id="expiration-date" />
+
+      <button id="proceed">Proceed</button>
+    </div>
+  </div>
+
+
+  <div id="success-modal" class="modal">
+    <div class="modal-content success-content">
+      <div class="checkmark">✔</div>
+      <h2>Purchase successfully completed</h2>
+      <p>The keys for the purchased game(s) have been sent to the corresponding email address.</p>
+      <button id="success-close-btn">OK</button>
+    </div>
+  </div>
+</body>
+</html>
+
