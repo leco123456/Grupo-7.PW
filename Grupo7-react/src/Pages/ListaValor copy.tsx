@@ -1,4 +1,4 @@
-const lista = () => {
+const ListaValor = () => {
     return <div>
   <h1>Juegos Más Vendidos</h1>
   <ul className="juego-lista">
@@ -31,4 +31,4 @@ const lista = () => {
 </div>
 }
 
-export default lista
+export default ListaValor
