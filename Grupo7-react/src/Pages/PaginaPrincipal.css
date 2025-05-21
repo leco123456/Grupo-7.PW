@@ -1,16 +1,15 @@
-/* PaginaPrincipal.css mejorado */
 
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: linear-gradient(135deg, #dbe9f4, #f0f4f8);
+  background: whitesmoke;
   margin: 0;
   padding: 0;
   color: #333;
 }
 
 .pagina-principal header {
-  background-color: #1a1a2e;
-  color: #f0f0f0;
+  background-color: #1e1e1e;
+  color: whitesmoke;
   padding: 20px 30px;
   box-shadow: 0 4px 8px rgba(26,26,46,0.6);
   position: sticky;
@@ -34,7 +33,7 @@ body {
 }
 
 .navbar button {
-  background-color: #3f51b5;
+  background-color: rgb(255, 144, 39);
   color: white;
   border: none;
   padding: 10px 16px;
@@ -42,12 +41,10 @@ body {
   border-radius: 8px;
   font-weight: 600;
   transition: background-color 0.3s ease;
-  box-shadow: 0 2px 5px rgba(63,81,181,0.3);
 }
 
 .navbar button:hover {
-  background-color: #2c387e;
-  box-shadow: 0 4px 12px rgba(44,56,126,0.6);
+  background-color: rgb(176, 100, 29);
 }
 
 .nav-icons {
@@ -58,7 +55,7 @@ body {
 }
 
 .nav-icons:hover {
-  color: #81d4fa;
+  color: rgb(176, 100, 29);
 }
 
 .navbar input[type="text"] {
@@ -73,8 +70,7 @@ body {
 
 .navbar input[type="text"]:focus {
   outline: none;
-  border-color: #3f51b5;
-  box-shadow: 0 0 6px #3f51b5aa;
+  border-color: rgb(255, 144, 39);
 }
 
 .carousel {
@@ -85,8 +81,21 @@ body {
   gap: 20px;
 }
 
+.carousel button{
+  margin: 4px 6px;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  background-color: rgb(255, 144, 39);
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
 .carousel-btn {
-  background-color: #3f51b5;
+  background-color: rgb(255, 144, 39);
   color: white;
   border: none;
   font-size: 28px;
@@ -95,22 +104,19 @@ body {
   border-radius: 50%;
   width: 50px;
   height: 50px;
-  box-shadow: 0 4px 12px rgba(63,81,181,0.4);
   transition: background-color 0.3s ease;
 }
 
 .carousel-btn:hover {
-  background-color: #283593;
-  box-shadow: 0 6px 20px rgba(40,53,147,0.6);
+  background-color: rgb(176, 100, 29);
 }
 
 .carousel-images {
-  width: 320px;
-  height: 220px;
+  width: 600px;
+  height: 420px;
   overflow: hidden;
   border-radius: 12px;
-  box-shadow: 0 6px 15px rgba(0,0,0,0.2);
-  background: white;
+  background: #1e1e1e;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -118,7 +124,7 @@ body {
 
 .carousel-image img {
   width: 100%;
-  height: 180px;
+  height: 300px;
   object-fit: cover;
   border-radius: 12px 12px 0 0;
 }
@@ -128,7 +134,7 @@ body {
   font-weight: 700;
   font-size: 18px;
   margin: 8px 0 12px 0;
-  color: #222;
+  color: whitesmoke;
 }
 
 .featured {
@@ -140,7 +146,7 @@ body {
   font-weight: 700;
   font-size: 26px;
   color: #1a1a2e;
-  border-bottom: 3px solid #3f51b5;
+  border-bottom: 3px solid #1e1e1e;
   width: fit-content;
   padding-bottom: 6px;
 }
@@ -153,9 +159,8 @@ body {
 }
 
 .game-card {
-  background-color: white;
+  background-color: #1e1e1e;
   border-radius: 14px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.12);
   width: 200px;
   padding: 12px 16px 20px 16px;
   text-align: center;
@@ -165,7 +170,6 @@ body {
 
 .game-card:hover {
   transform: translateY(-8px);
-  box-shadow: 0 12px 28px rgba(0,0,0,0.25);
 }
 
 .game-card img {
@@ -179,7 +183,7 @@ body {
 .game-card h3 {
   margin: 8px 0 12px 0;
   font-size: 18px;
-  color: #1a1a2e;
+  color: whitesmoke;
   user-select: none;
 }
 
@@ -189,17 +193,15 @@ body {
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  background-color: #007bff;
+  background-color: rgb(255, 144, 39);
   color: white;
   font-size: 15px;
   font-weight: 600;
-  box-shadow: 0 4px 10px rgba(0,123,255,0.4);
   transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .game-card button:hover {
-  background-color: #0056b3;
-  box-shadow: 0 6px 14px rgba(0,86,179,0.7);
+  background-color: rgb(176, 100, 29);
 }
 
 .cart {
@@ -207,7 +209,6 @@ body {
   margin: 30px auto 40px auto;
   padding: 25px 30px;
   border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.12);
   max-width: 420px;
   color: #1a1a2e;
 }
@@ -216,7 +217,7 @@ body {
   margin-top: 0;
   font-size: 22px;
   font-weight: 700;
-  border-bottom: 2px solid #3f51b5;
+  border-bottom: 2px solid #1e1e1e;
   padding-bottom: 10px;
   user-select: none;
 }
@@ -299,7 +300,7 @@ body {
 }
 
 .modal-content {
-  background-color: #f0f4f8;
+  background-color: #1e1e1e !important;
   margin: 12% auto;
   padding: 30px 40px;
   border-radius: 16px;
@@ -309,11 +310,11 @@ body {
   position: relative;
   text-align: center;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: #1a1a2e;
+  color: whitesmoke !important;
 }
 
 .close {
-  color: #777;
+  color: rgb(255, 144, 39);
   position: absolute;
   top: 16px;
   right: 28px;
@@ -324,7 +325,7 @@ body {
 }
 
 .close:hover {
-  color: #3f51b5;
+  color: rgb(176, 100, 29);
 }
 
 .modal-content h2 {
@@ -332,6 +333,7 @@ body {
   margin-bottom: 25px;
   font-size: 28px;
   font-weight: 700;
+  color: whitesmoke;
 }
 
 .modal-content label {
@@ -339,7 +341,7 @@ body {
   margin: 12px 0 6px 0;
   font-weight: 600;
   text-align: left;
-  color: #555;
+  color: whitesmoke;
 }
 
 .modal-content input {
@@ -353,28 +355,22 @@ body {
   transition: border-color 0.3s ease;
 }
 
-.modal-content input:focus {
-  outline: none;
-  border-color: #3f51b5;
-  box-shadow: 0 0 8px #3f51b5aa;
-}
 
 #proceed {
   width: 100%;
   padding: 14px 0;
-  background-color: #3f51b5;
+  background-color: rgb(255, 144, 39);
   border: none;
   color: white;
   font-weight: 800;
   font-size: 18px;
   border-radius: 12px;
   cursor: pointer;
-  box-shadow: 0 8px 22px rgba(63,81,181,0.6);
   transition: background-color 0.3s ease;
 }
 
 #proceed:hover {
-  background-color: #283593;
+  background-color: rgb(176, 100, 29);
 }
 
 @media screen and (max-width: 620px) {
