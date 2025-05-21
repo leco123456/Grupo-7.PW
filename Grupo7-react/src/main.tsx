@@ -12,7 +12,7 @@ import EditarJuego from './Pages/EditarJuego'
 import EliminarJuego from './Pages/EliminarJuego'
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-   <PaginaPrincipal/>
+   <Reseña/>
    
   </StrictMode>,
 )
