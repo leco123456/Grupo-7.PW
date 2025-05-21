@@ -6,7 +6,8 @@ const juegos = [
     nombre: "The Last of Us™ Remastered",
     descripcion: "Juego de supervivencia",
     precio: 159,
-    descuento: "0%"
+    descuento: "0%",
+    fecha: "2023-12"
   },
   {
     id: 2,
@@ -15,7 +16,8 @@ const juegos = [
     nombre: "Elden Ring",
     descripcion: "Aventura en mundo abierto",
     precio: 172.5,
-    descuento: "75%"
+    descuento: "75%",
+    fecha: "2022-10"
   }
 ];
 
@@ -23,11 +25,11 @@ let idAEliminar = null;
 let editMode = false;
 let juegoEditando = null;
 
-function renderTabla() {
+function renderTabla(lista = juegos) {
   const tbody = document.getElementById("gameTableBody");
   tbody.innerHTML = "";
 
-  juegos.forEach((juego) => {
+  lista.forEach((juego) => {
     const fila = document.createElement("tr");
     fila.innerHTML = `
       <td><img src="${juego.foto}" alt="game" /></td>
@@ -88,6 +90,7 @@ function editarJuego(id) {
   document.getElementById("gamePrice").value = juego.precio;
   document.getElementById("gameDiscount").value = parseInt(juego.descuento);
   document.getElementById("gamePhoto").value = juego.foto;
+  document.getElementById("gameReleaseDate").value = juego.fecha;
 
   document.getElementById("gameFormModal").style.display = "flex";
 }
@@ -102,7 +105,8 @@ document.getElementById("gameForm").addEventListener("submit", function (e) {
     categoria: document.getElementById("gameCategory").value,
     precio: parseFloat(document.getElementById("gamePrice").value),
     descuento: document.getElementById("gameDiscount").value + "%",
-    foto: document.getElementById("gamePhoto").value
+    foto: document.getElementById("gamePhoto").value,
+    fecha: document.getElementById("gameReleaseDate").value
   };
 
   if (editMode) {
@@ -116,4 +120,35 @@ document.getElementById("gameForm").addEventListener("submit", function (e) {
   closeForm();
 });
 
-window.onload = renderTabla;
+document.getElementById("filterBtn").addEventListener("click", () => {
+  const form = document.getElementById("filterForm");
+  form.style.display = form.style.display === "none" ? "block" : "none";
+});
+
+document.getElementById("filterForm").addEventListener("submit", function (e) {
+  e.preventDefault();
+
+  const cat = document.getElementById("filterCategory").value;
+  const year = document.getElementById("filterYear").value;
+  const order = document.getElementById("filterOrder").value;
+  const minPrice = parseFloat(document.getElementById("filterMinPrice").value);
+  const maxPrice = parseFloat(document.getElementById("filterMaxPrice").value);
+
+  let juegosFiltrados = juegos.filter(juego => {
+    const cumpleCategoria = !cat || juego.categoria === cat;
+    const cumpleAño = !year || (juego.fecha && juego.fecha.startsWith(year));
+    const cumplePrecio = (!minPrice || juego.precio >= minPrice) &&
+                         (!maxPrice || juego.precio <= maxPrice);
+    return cumpleCategoria && cumpleAño && cumplePrecio;
+  });
+
+  if (order === "newest") {
+    juegosFiltrados.sort((a, b) => (b.fecha || "").localeCompare(a.fecha || ""));
+  } else if (order === "oldest") {
+    juegosFiltrados.sort((a, b) => (a.fecha || "").localeCompare(b.fecha || ""));
+  }
+
+  renderTabla(juegosFiltrados);
+});
+
+window.onload = () => renderTabla();
