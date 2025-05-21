@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Marketplace de Videojuegos</title>
+  <link rel="stylesheet" href="./req10.css" />
+  <script src="./req10.js" defer></script>
+</head>
+<body>
+  <nav class="navbar">
+
+    <button onclick="window.location.href='../../BrunoT_req 3_5_15_19/requerimiento15.html'">Edit Profile</button>
+    <button>Explore</button>
+    <button>Categories</button>
+    <button>Home</button>
+    <button>Platform</button>
+    <button onclick="window.location.href='../../GaelM/ListaValorados/requerimiento_7.html'">Best Sellers</button>
+    <button onclick="window.location.href='../../GaelM/ListaValorados/requerimiento_8.html'">Best Rated</button>
+    <button>Special Offers</button>
+    <div class="nav-icons">
+      <span>👤</span>
+      <input type="text" placeholder="Search..." />
+    </div>
+  </nav>
+
+  <section class="carousel">
+    <button class="carousel-btn">⬅</button>
+    <div class="carousel-image">
+      <img src="../../BrunoT_req 3_5_15_19/Darth Vader.jpg" alt="Noticia 1" width="250" height="150">
+      <p>Chatbot de Darth Vader causa polemica</p>
+      <button>Leer más</button>
+    </div>
+    <div class="carousel-image">
+      <img src="../../BrunoT_req 3_5_15_19/GTA6.jpg" alt="Noticia 2" width="250" height="150" />
+      <p>El lanzamiento de Grand Theft Auto 6 se retrasa</p>
+      <button>Leer más</button>
+    </div>
+    <div class="carousel-image">
+      <img src="../../BrunoT_req 3_5_15_19/TLOU.jpg" alt="Noticia 3" width="250" height="150" />
+      <p>Controversia en torno a la adaptacion de The Last Of Us</p>
+      <button>Leer más</button>
+    </div>
+    <button class="carousel-btn">➡</button>
+  </section>
+
+  <section class="featured">
+    <h2>Últimos juegos añadidos</h2>
+    <div class="games-list" id="catalogo">
+    </div>
+  </section>
+
+  <section class="cart">
+    <h3>🛒 Shopping Cart (<span id="carrito-contador">0</span>)</h3>
+    <div id="cart-items"></div>
+    <div class="cart-actions">
+      <button id="confirmar">✔ Confirm Order</button>
+      <button id="cancelar">✖ Cancel Order</button>
+    </div>
+  </section>
+</body>
+</html>
