@@ -1,0 +1,114 @@
+/* ConfirmarOrden.css */
+
+/* Fondo oscuro semi-transparente que cubre toda la pantalla */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* negro con transparencia */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* Contenedor del contenido del modal */
+.modal-content {
+  background-color: #fff;
+  padding: 25px 30px;
+  border-radius: 8px;
+  width: 350px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  position: relative;
+}
+
+/* Botón de cerrar (la X) */
+.close {
+  position: absolute;
+  top: 12px;
+  right: 15px;
+  font-size: 20px;
+  font-weight: bold;
+  color: #333;
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.2s ease;
+}
+
+.close:hover {
+  color: #d33;
+}
+
+/* Titular del modal */
+.modal-content h2 {
+  margin-bottom: 20px;
+  font-weight: 600;
+  text-align: center;
+  color: #222;
+}
+
+/* Etiquetas */
+.modal-content label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
+  color: #555;
+}
+
+/* Inputs del formulario */
+.modal-content input[type="text"] {
+  width: 100%;
+  padding: 8px 10px;
+  margin-bottom: 15px;
+  border: 1.5px solid #ccc;
+  border-radius: 5px;
+  font-size: 14px;
+  transition: border-color 0.3s ease;
+}
+
+.modal-content input[type="text"]:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+/* Botón de proceder */
+#proceed {
+  width: 100%;
+  padding: 10px 0;
+  background-color: #007bff; /* azul */
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+#proceed:hover {
+  background-color: #0056b3;
+}
+
+.purchase-success {
+  text-align: center;
+  padding: 20px 10px;
+}
+
+.purchase-success .checkmark {
+  font-size: 50px;
+  color: #28a745; /* verde */
+  margin-bottom: 15px;
+}
+
+.purchase-success h2 {
+  color: #28a745;
+  margin-bottom: 10px;
+  font-weight: 700;
+}
+
+.purchase-success p {
+  color: #555;
+  font-size: 16px;
+}

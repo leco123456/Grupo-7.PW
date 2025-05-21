@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import ConfirmarOrden from './Confirmarorden'; 
 import './PaginaPrincipal.css';
+
 
 const juegos = [
   {
@@ -32,9 +34,45 @@ const juegos = [
 
 const PaginaPrincipal = () => {
   const navigate = useNavigate();
+  const [index, setIndex] = useState(0);
+  const [carrito, setCarrito] = useState<any[]>([]);
+
+  // Estado para controlar la visibilidad del modal
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const handlePrev = () => {
+    setIndex((prevIndex) => (prevIndex === 0 ? juegos.length - 1 : prevIndex - 1));
+  };
+
+  const handleNext = () => {
+    setIndex((prevIndex) => (prevIndex === juegos.length - 1 ? 0 : prevIndex + 1));
+  };
+
+  const agregarAlCarrito = (juego: any) => {
+    setCarrito((prev) => [...prev, juego]);
+  };
+
+  const cancelarCarrito = () => {
+    setCarrito([]);
+  };
+
+  // Abrir modal confirmación
+  const abrirModal = () => {
+    if (carrito.length === 0) {
+      alert("El carrito está vacío. Agrega al menos un juego para confirmar la orden.");
+      return;
+    }
+    setModalVisible(true);
+  };
+
+  // Cerrar modal
+  const cerrarModal = () => {
+    setModalVisible(false);
+  };
 
   return (
     <div className="pagina-principal">
+      {/* Header y navegación igual */}
       <header>
         <h1>Catálogo de Juegos</h1>
         <nav className="navbar">
@@ -44,7 +82,12 @@ const PaginaPrincipal = () => {
           <button>Platform</button>
           <button>Special Offers</button>
 
-          <div className="nav-icons" onClick={() => navigate('/adminjuegos')} title="Admin Panel" style={{ cursor: 'pointer' }}>
+          <div
+            className="nav-icons"
+            onClick={() => navigate('/adminjuegos')}
+            title="Admin Panel"
+            style={{ cursor: 'pointer' }}
+          >
             <span role="img" aria-label="user">👤</span>
           </div>
 
@@ -52,18 +95,17 @@ const PaginaPrincipal = () => {
         </nav>
       </header>
 
+      {/* Carrusel y sección de juegos igual */}
       <section className="carousel">
-        <button className="carousel-btn">⬅</button>
+        <button className="carousel-btn" onClick={handlePrev}>⬅</button>
         <div className="carousel-images">
-          {juegos.map(juego => (
-            <div key={juego.id} className="carousel-image">
-              <img src={juego.imagen} alt={juego.nombre} />
-              <p>{juego.nombre}</p>
-              <button>Detalles</button>
-            </div>
-          ))}
+          <div className="carousel-image">
+            <img src={juegos[index].imagen} alt={juegos[index].nombre} />
+            <p>{juegos[index].nombre}</p>
+            <button>Detalles</button>
+          </div>
         </div>
-        <button className="carousel-btn">➡</button>
+        <button className="carousel-btn" onClick={handleNext}>➡</button>
       </section>
 
       <section className="featured">
@@ -73,21 +115,36 @@ const PaginaPrincipal = () => {
             <div key={juego.id} className="game-card">
               <img src={juego.imagen} alt={juego.nombre} />
               <h3>{juego.nombre}</h3>
-              <button>Agregar</button>
+              <button onClick={() => agregarAlCarrito(juego)}>Agregar</button>
               <button>Detalles</button>
             </div>
           ))}
         </div>
       </section>
 
+      {/* Carrito de compras */}
       <section className="cart">
-        <h3>🛒 Shopping Cart (<span id="carrito-contador">0</span>)</h3>
-        <div id="cart-items"></div>
+        <h3>🛒 Shopping Cart (<span>{carrito.length}</span>)</h3>
+        <div id="cart-items">
+          {carrito.length === 0 ? (
+            <p>Tu carrito está vacío</p>
+          ) : (
+            carrito.map((item, index) => (
+              <div key={index} className="cart-item">
+                <img src={item.imagen} alt={item.nombre} width="50" />
+                <span>{item.nombre}</span>
+              </div>
+            ))
+          )}
+        </div>
         <div className="cart-actions">
-          <button id="confirmar">✔ Confirm Order</button>
-          <button id="cancelar">✖ Cancel Order</button>
+          <button id="confirmar" onClick={abrirModal}>✔ Confirm Order</button>
+          <button id="cancelar" onClick={cancelarCarrito}>✖ Cancel Order</button>
         </div>
       </section>
+
+      {/* Modal ConfirmarOrden */}
+      <ConfirmarOrden visible={modalVisible} onClose={cerrarModal} />
     </div>
   );
 };
