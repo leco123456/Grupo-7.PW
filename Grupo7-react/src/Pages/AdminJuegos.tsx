@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import AgregarJuego from './AgregarJuego';
+import EditarJuego from './EditarJuego';
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import './AdminJuegos.css';
 
@@ -15,9 +16,8 @@ interface Game {
 }
 
 const AdminJuegos = () => {
-  const [mostrarModal, setMostrarModal] = useState(false);
-
-  // Estado para la lista de juegos
+  const [mostrarAgregarModal, setMostrarAgregarModal] = useState(false);
+  const [mostrarEditarModal, setMostrarEditarModal] = useState(false);
   const [juegos, setJuegos] = useState<Game[]>([
     {
       name: 'God of War',
@@ -29,24 +29,36 @@ const AdminJuegos = () => {
       date: '2025-05-20',
     },
   ]);
-
-  // Función para abrir el modal
-  const handleAbrirModal = () => {
-    setMostrarModal(true);
-  };
-
-  // Función para cerrar el modal
-  const handleCerrarModal = () => {
-    setMostrarModal(false);
-  };
+  const [juegoEnEdicion, setJuegoEnEdicion] = useState<Game | null>(null);
+  const [juegoIndexEnEdicion, setJuegoIndexEnEdicion] = useState<number | null>(null);
 
   // Función para agregar un nuevo juego
   const agregarJuego = (juego: Omit<Game, 'date'>) => {
     const nuevoJuego: Game = {
       ...juego,
-      date: new Date().toISOString().split('T')[0], // fecha actual
+      date: new Date().toISOString().split('T')[0],
     };
-    setJuegos((prev) => [...prev, nuevoJuego]);
+    setJuegos([...juegos, nuevoJuego]);
+    setMostrarAgregarModal(false);
+  };
+
+  // Función para iniciar la edición
+  const handleEditarClick = (juego: Game, index: number) => {
+    setJuegoEnEdicion(juego);
+    setJuegoIndexEnEdicion(index);
+    setMostrarEditarModal(true);
+  };
+
+  // Guardar los cambios del juego editado
+  const guardarJuegoEditado = (juegoEditado: Game) => {
+    if (juegoIndexEnEdicion !== null) {
+      const juegosActualizados = [...juegos];
+      juegosActualizados[juegoIndexEnEdicion] = juegoEditado;
+      setJuegos(juegosActualizados);
+    }
+    setMostrarEditarModal(false);
+    setJuegoEnEdicion(null);
+    setJuegoIndexEnEdicion(null);
   };
 
   return (
@@ -65,9 +77,7 @@ const AdminJuegos = () => {
       <main className="admin-panel">
         <h2>Games</h2>
         <div className="actions">
-          <button onClick={handleAbrirModal}>+ Add</button>
-          <button>Editar</button>
-          <button>Eliminar</button>
+          <button onClick={() => setMostrarAgregarModal(true)}>+ Add</button>
         </div>
 
         <table className="game-table">
@@ -90,7 +100,10 @@ const AdminJuegos = () => {
                 <td>${juego.price}</td>
                 <td>{juego.discount}%</td>
                 <td>
-                  <FaEdit style={{ cursor: 'pointer', marginRight: '10px' }} />
+                  <FaEdit
+                    style={{ cursor: 'pointer', marginRight: '10px' }}
+                    onClick={() => handleEditarClick(juego, index)}
+                  />
                   <FaTrash style={{ cursor: 'pointer' }} />
                 </td>
               </tr>
@@ -99,9 +112,19 @@ const AdminJuegos = () => {
         </table>
       </main>
 
-      {/* Modal para agregar juego */}
-      {mostrarModal && (
-        <AgregarJuego onClose={handleCerrarModal} onAddGame={agregarJuego} />
+      {mostrarAgregarModal && (
+        <AgregarJuego
+          onClose={() => setMostrarAgregarModal(false)}
+          onAddGame={agregarJuego}
+        />
+      )}
+
+      {mostrarEditarModal && juegoEnEdicion && (
+        <EditarJuego
+          juego={juegoEnEdicion}
+          onClose={() => setMostrarEditarModal(false)}
+          onSave={guardarJuegoEditado}
+        />
       )}
     </>
   );
