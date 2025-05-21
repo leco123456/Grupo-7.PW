@@ -3,15 +3,50 @@ import AgregarJuego from './AgregarJuego';
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import './AdminJuegos.css';
 
+// Tipo para los juegos
+interface Game {
+  name: string;
+  description: string;
+  category: string;
+  price: number;
+  discount: number;
+  photo: string;
+  date: string;
+}
+
 const AdminJuegos = () => {
   const [mostrarModal, setMostrarModal] = useState(false);
 
+  // Estado para la lista de juegos
+  const [juegos, setJuegos] = useState<Game[]>([
+    {
+      name: 'God of War',
+      description: 'Epic action game',
+      category: 'Action',
+      price: 60,
+      discount: 10,
+      photo: 'https://example.com/godofwar.jpg',
+      date: '2025-05-20',
+    },
+  ]);
+
+  // Función para abrir el modal
   const handleAbrirModal = () => {
     setMostrarModal(true);
   };
 
+  // Función para cerrar el modal
   const handleCerrarModal = () => {
     setMostrarModal(false);
+  };
+
+  // Función para agregar un nuevo juego
+  const agregarJuego = (juego: Omit<Game, 'date'>) => {
+    const nuevoJuego: Game = {
+      ...juego,
+      date: new Date().toISOString().split('T')[0], // fecha actual
+    };
+    setJuegos((prev) => [...prev, nuevoJuego]);
   };
 
   return (
@@ -47,23 +82,27 @@ const AdminJuegos = () => {
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>2025-05-20</td>
-              <td>Action</td>
-              <td>God of War</td>
-              <td>$60</td>
-              <td>10%</td>
-              <td>
-                <FaEdit style={{ cursor: 'pointer', marginRight: '10px' }} />
-                <FaTrash style={{ cursor: 'pointer' }} />
-              </td>
-            </tr>
+            {juegos.map((juego, index) => (
+              <tr key={index}>
+                <td>{juego.date}</td>
+                <td>{juego.category}</td>
+                <td>{juego.name}</td>
+                <td>${juego.price}</td>
+                <td>{juego.discount}%</td>
+                <td>
+                  <FaEdit style={{ cursor: 'pointer', marginRight: '10px' }} />
+                  <FaTrash style={{ cursor: 'pointer' }} />
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </main>
 
-      {/* Mostrar modal */}
-      {mostrarModal && <AgregarJuego onClose={handleCerrarModal} />}
+      {/* Modal para agregar juego */}
+      {mostrarModal && (
+        <AgregarJuego onClose={handleCerrarModal} onAddGame={agregarJuego} />
+      )}
     </>
   );
 };
