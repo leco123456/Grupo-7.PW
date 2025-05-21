@@ -1,8 +1,8 @@
+// PaginaPrincipal.tsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import ConfirmarOrden from './Confirmarorden'; 
+import ConfirmarOrden from './Confirmarorden';
 import './PaginaPrincipal.css';
-
 
 const juegos = [
   {
@@ -36,8 +36,6 @@ const PaginaPrincipal = () => {
   const navigate = useNavigate();
   const [index, setIndex] = useState(0);
   const [carrito, setCarrito] = useState<any[]>([]);
-
-  // Estado para controlar la visibilidad del modal
   const [modalVisible, setModalVisible] = useState(false);
 
   const handlePrev = () => {
@@ -49,14 +47,19 @@ const PaginaPrincipal = () => {
   };
 
   const agregarAlCarrito = (juego: any) => {
+    if (carrito.find(item => item.id === juego.id)) {
+      alert("Este juego ya está en el carrito.");
+      return;
+    }
     setCarrito((prev) => [...prev, juego]);
   };
 
   const cancelarCarrito = () => {
-    setCarrito([]);
+    if (carrito.length === 0) return;
+    const confirmacion = window.confirm("¿Estás seguro de que deseas cancelar la orden?");
+    if (confirmacion) setCarrito([]);
   };
 
-  // Abrir modal confirmación
   const abrirModal = () => {
     if (carrito.length === 0) {
       alert("El carrito está vacío. Agrega al menos un juego para confirmar la orden.");
@@ -65,20 +68,18 @@ const PaginaPrincipal = () => {
     setModalVisible(true);
   };
 
-  // Cerrar modal
   const cerrarModal = () => {
     setModalVisible(false);
   };
 
   return (
     <div className="pagina-principal">
-      {/* Header y navegación igual */}
       <header>
         <h1>Catálogo de Juegos</h1>
         <nav className="navbar">
           <button>Explore</button>
           <button>Categories</button>
-          <button>Home</button>
+          <button onClick={() => navigate('/paginaprincipal')}>Home</button>
           <button>Platform</button>
           <button>Special Offers</button>
 
@@ -95,13 +96,13 @@ const PaginaPrincipal = () => {
         </nav>
       </header>
 
-      {/* Carrusel y sección de juegos igual */}
       <section className="carousel">
         <button className="carousel-btn" onClick={handlePrev}>⬅</button>
         <div className="carousel-images">
           <div className="carousel-image">
             <img src={juegos[index].imagen} alt={juegos[index].nombre} />
             <p>{juegos[index].nombre}</p>
+            <button onClick={() => agregarAlCarrito(juegos[index])}>Agregar</button>
             <button>Detalles</button>
           </div>
         </div>
@@ -122,7 +123,6 @@ const PaginaPrincipal = () => {
         </div>
       </section>
 
-      {/* Carrito de compras */}
       <section className="cart">
         <h3>🛒 Shopping Cart (<span>{carrito.length}</span>)</h3>
         <div id="cart-items">
@@ -138,12 +138,11 @@ const PaginaPrincipal = () => {
           )}
         </div>
         <div className="cart-actions">
-          <button id="confirmar" onClick={abrirModal}>✔ Confirm Order</button>
-          <button id="cancelar" onClick={cancelarCarrito}>✖ Cancel Order</button>
+          <button onClick={abrirModal}>✔ Confirmar Orden</button>
+          <button onClick={cancelarCarrito}>✖ Cancelar Orden</button>
         </div>
       </section>
 
-      {/* Modal ConfirmarOrden */}
       <ConfirmarOrden visible={modalVisible} onClose={cerrarModal} />
     </div>
   );

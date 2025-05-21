@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import AgregarJuego from './AgregarJuego';
 import EditarJuego from './EditarJuego';
-import EliminarJuego from './EliminarJuego'; 
+import EliminarJuego from './EliminarJuego';
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import './AdminJuegos.css';
 
@@ -16,141 +16,163 @@ interface Game {
 }
 
 const AdminJuegos = () => {
-  const [mostrarAgregarModal, setMostrarAgregarModal] = useState(false);
-  const [mostrarEditarModal, setMostrarEditarModal] = useState(false);
-  const [mostrarEliminarModal, setMostrarEliminarModal] = useState(false); 
-  const [juegos, setJuegos] = useState<Game[]>([]); // Empezamos con un array vacío
+  const [juegos, setJuegos] = useState<Game[]>([]);
   const [juegoEnEdicion, setJuegoEnEdicion] = useState<Game | null>(null);
-  const [juegoIndexEnEdicion, setJuegoIndexEnEdicion] = useState<number | null>(null);
-  const [juegoAEliminar, setJuegoAEliminar] = useState<Game | null>(null); 
+  const [indexEnEdicion, setIndexEnEdicion] = useState<number | null>(null);
+  const [juegoAEliminar, setJuegoAEliminar] = useState<Game | null>(null);
 
-  // Cargar juegos desde localStorage al montar el componente
+  const [mostrarAgregar, setMostrarAgregar] = useState(false);
+  const [mostrarEditar, setMostrarEditar] = useState(false);
+  const [mostrarEliminar, setMostrarEliminar] = useState(false);
+
+  // 🔐 Verificar si el usuario es admin
   useEffect(() => {
-    const juegosGuardados = localStorage.getItem('juegos');
-    if (juegosGuardados) {
-      setJuegos(JSON.parse(juegosGuardados));  // Si hay juegos guardados, los cargamos
+    const role = localStorage.getItem('userRole');
+    if (role !== 'admin') {
+      alert('Acceso denegado. Solo para administradores.');
+      window.location.href = '/';
     }
   }, []);
 
-  // Guardar juegos en localStorage cuando se actualicen
+  // 📥 Cargar juegos al iniciar
   useEffect(() => {
-    if (juegos.length > 0) {
-      localStorage.setItem('juegos', JSON.stringify(juegos));  // Guardamos los juegos cada vez que se actualizan
-    }
+    const juegosGuardados = localStorage.getItem('juegos');
+    if (juegosGuardados) setJuegos(JSON.parse(juegosGuardados));
+  }, []);
+
+  // 💾 Guardar juegos cada vez que cambian
+  useEffect(() => {
+    localStorage.setItem('juegos', JSON.stringify(juegos));
   }, [juegos]);
 
-  const agregarJuego = (juego: Omit<Game, 'date'>) => {
-    const nuevoJuego: Game = {
-      ...juego,
-      date: new Date().toISOString().split('T')[0],  // Asignamos la fecha actual
+  // ➕ Agregar juego nuevo
+  const agregarJuego = (nuevoJuego: Omit<Game, 'date'>) => {
+    const juegoConFecha: Game = {
+      ...nuevoJuego,
+      date: new Date().toISOString().split('T')[0],
     };
-    setJuegos([...juegos, nuevoJuego]);  // Agregamos el nuevo juego a la lista
-    setMostrarAgregarModal(false);  // Cerramos el modal
+    setJuegos([...juegos, juegoConFecha]);
+    setMostrarAgregar(false);
   };
 
-  const handleEditarClick = (juego: Game, index: number) => {
+  // ✏️ Preparar edición
+  const handleEditar = (juego: Game, index: number) => {
     setJuegoEnEdicion(juego);
-    setJuegoIndexEnEdicion(index);
-    setMostrarEditarModal(true);
+    setIndexEnEdicion(index);
+    setMostrarEditar(true);
   };
 
-  const guardarJuegoEditado = (juegoEditado: Game) => {
-    if (juegoIndexEnEdicion !== null) {
-      const juegosActualizados = [...juegos];
-      juegosActualizados[juegoIndexEnEdicion] = juegoEditado;
-      setJuegos(juegosActualizados);
+  // 💾 Guardar cambios de edición
+  const guardarEdicion = (juegoEditado: Game) => {
+    if (indexEnEdicion !== null) {
+      const copia = [...juegos];
+      copia[indexEnEdicion] = juegoEditado;
+      setJuegos(copia);
     }
-    setMostrarEditarModal(false);
+    setMostrarEditar(false);
     setJuegoEnEdicion(null);
-    setJuegoIndexEnEdicion(null);
+    setIndexEnEdicion(null);
   };
 
-  const handleEliminarClick = (juego: Game) => {
+  // 🗑️ Confirmar eliminación
+  const handleEliminar = (juego: Game) => {
     setJuegoAEliminar(juego);
-    setMostrarEliminarModal(true); 
+    setMostrarEliminar(true);
   };
 
   const eliminarJuego = () => {
     if (juegoAEliminar) {
-      setJuegos(juegos.filter((juego) => juego.name !== juegoAEliminar.name)); 
-      setMostrarEliminarModal(false);
-      setJuegoAEliminar(null); 
+      const actualizados = juegos.filter(j => j.name !== juegoAEliminar.name);
+      setJuegos(actualizados);
     }
+    setMostrarEliminar(false);
+    setJuegoAEliminar(null);
+  };
+
+  // 🚪 Cerrar sesión
+  const handleLogout = () => {
+    localStorage.removeItem('userRole');
+    alert('Sesión cerrada.');
+    window.location.href = '/';
   };
 
   return (
     <>
       <aside className="sidebar">
-        <p>Jon Shmoe</p>
+        <p>Admin Panel</p>
         <nav>
           <button>Users</button>
           <button className="active">Games</button>
           <button>News</button>
           <button>Statistics</button>
-          <button>Log out</button>
+          <button onClick={handleLogout}>Log out</button>
         </nav>
       </aside>
 
       <main className="admin-panel">
-        <h2>Games</h2>
+        <h2>Gestión de Juegos</h2>
+
         <div className="actions">
-          <button onClick={() => setMostrarAgregarModal(true)}>+ Add</button>
+          <button onClick={() => setMostrarAgregar(true)}>+ Agregar Juego</button>
         </div>
 
-        <table className="game-table">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Category</th>
-              <th>Name</th>
-              <th>Base Price</th>
-              <th>Discount</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {juegos.map((juego, index) => (
-              <tr key={index}>
-                <td>{juego.date}</td>
-                <td>{juego.category}</td>
-                <td>{juego.name}</td>
-                <td>${juego.price}</td>
-                <td>{juego.discount}%</td>
-                <td>
-                  <FaEdit
-                    style={{ cursor: 'pointer', marginRight: '10px' }}
-                    onClick={() => handleEditarClick(juego, index)}
-                  />
-                  <FaTrash
-                    style={{ cursor: 'pointer' }}
-                    onClick={() => handleEliminarClick(juego)}
-                  />
-                </td>
+        {juegos.length === 0 ? (
+          <p className="info">No hay juegos registrados.</p>
+        ) : (
+          <table className="game-table">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Categoría</th>
+                <th>Nombre</th>
+                <th>Precio</th>
+                <th>Descuento</th>
+                <th>Acciones</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {juegos.map((juego, index) => (
+                <tr key={index}>
+                  <td>{juego.date}</td>
+                  <td>{juego.category}</td>
+                  <td>{juego.name}</td>
+                  <td>${juego.price.toFixed(2)}</td>
+                  <td>{juego.discount}%</td>
+                  <td>
+                    <FaEdit
+                      className="icon edit"
+                      onClick={() => handleEditar(juego, index)}
+                    />
+                    <FaTrash
+                      className="icon delete"
+                      onClick={() => handleEliminar(juego)}
+                    />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </main>
 
-      {mostrarAgregarModal && (
+      {/* MODALES */}
+      {mostrarAgregar && (
         <AgregarJuego
-          onClose={() => setMostrarAgregarModal(false)}
+          onClose={() => setMostrarAgregar(false)}
           onAddGame={agregarJuego}
         />
       )}
-
-      {mostrarEditarModal && juegoEnEdicion && (
+      {mostrarEditar && juegoEnEdicion && (
         <EditarJuego
           juego={juegoEnEdicion}
-          onClose={() => setMostrarEditarModal(false)}
-          onSave={guardarJuegoEditado}
+          onClose={() => setMostrarEditar(false)}
+          onSave={guardarEdicion}
         />
       )}
-
-      {mostrarEliminarModal && juegoAEliminar && (
+      {mostrarEliminar && juegoAEliminar && (
         <EliminarJuego
           juego={juegoAEliminar.name}
-          onClose={() => setMostrarEliminarModal(false)}
+          onClose={() => setMostrarEliminar(false)}
           onConfirm={eliminarJuego}
         />
       )}

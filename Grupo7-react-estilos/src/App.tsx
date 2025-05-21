@@ -1,18 +1,31 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import PaginaPrincipal from './Pages/PaginaPrincipal'
-import AdminJuegos from './Pages/AdminJuegos'
-// ... otros imports
+import { Routes, Route } from 'react-router-dom';
+
+import SignIn from './Pages/SignIn';
+import SignUp from './Pages/SignUp';
+import PaginaPrincipal from './Pages/PaginaPrincipal';
+import AdminJuegos from './Pages/AdminJuegos';
+import ConfirmarOrden from './Pages/Confirmarorden';
+import ListaValor from './Pages/ListaValor';
+import ListaVenta from './Pages/ListaVenta';
+import Resena from './Pages/Resena';
+import Detalle from './Pages/Detalle';
+import ResetPass from './Pages/ResetPass';
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<PaginaPrincipal />} />
-        <Route path="/adminjuegos" element={<AdminJuegos />} />
-        {/* otras rutas */}
-      </Routes>
-    </Router>
-  )
+    <Routes>
+      <Route path="/" element={<SignIn />} />
+      <Route path="/signup" element={<SignUp />} />
+      <Route path="/paginaprincipal" element={<PaginaPrincipal />} />
+      <Route path="/adminjuegos" element={<AdminJuegos />} />
+      <Route path="/confirmarorden" element={<ConfirmarOrden />} />
+      <Route path="/listavalor" element={<ListaValor />} />
+      <Route path="/listaventa" element={<ListaVenta />} />
+      <Route path="/resena" element={<Resena />} />
+      <Route path="/detalle" element={<Detalle />} />
+      <Route path="/resetpass" element={<ResetPass />} />
+    </Routes>
+  );
 }
 
-export default App
+export default App;
