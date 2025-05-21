@@ -1,11 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AgregarJuego from './AgregarJuego';
 import EditarJuego from './EditarJuego';
-import EliminarJuego from './EliminarJuego';  // Importamos el componente de eliminar
+import EliminarJuego from './EliminarJuego'; 
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import './AdminJuegos.css';
 
-// Tipo para los juegos
 interface Game {
   name: string;
   description: string;
@@ -19,40 +18,42 @@ interface Game {
 const AdminJuegos = () => {
   const [mostrarAgregarModal, setMostrarAgregarModal] = useState(false);
   const [mostrarEditarModal, setMostrarEditarModal] = useState(false);
-  const [mostrarEliminarModal, setMostrarEliminarModal] = useState(false);  // Estado para el modal de eliminar
-  const [juegos, setJuegos] = useState<Game[]>([
-    {
-      name: 'God of War',
-      description: 'Epic action game',
-      category: 'Action',
-      price: 60,
-      discount: 10,
-      photo: 'https://example.com/godofwar.jpg',
-      date: '2025-05-20',
-    },
-  ]);
+  const [mostrarEliminarModal, setMostrarEliminarModal] = useState(false); 
+  const [juegos, setJuegos] = useState<Game[]>([]); // Empezamos con un array vacío
   const [juegoEnEdicion, setJuegoEnEdicion] = useState<Game | null>(null);
   const [juegoIndexEnEdicion, setJuegoIndexEnEdicion] = useState<number | null>(null);
-  const [juegoAEliminar, setJuegoAEliminar] = useState<Game | null>(null);  // Estado para el juego que estamos a punto de eliminar
+  const [juegoAEliminar, setJuegoAEliminar] = useState<Game | null>(null); 
 
-  // Función para agregar un nuevo juego
+  // Cargar juegos desde localStorage al montar el componente
+  useEffect(() => {
+    const juegosGuardados = localStorage.getItem('juegos');
+    if (juegosGuardados) {
+      setJuegos(JSON.parse(juegosGuardados));  // Si hay juegos guardados, los cargamos
+    }
+  }, []);
+
+  // Guardar juegos en localStorage cuando se actualicen
+  useEffect(() => {
+    if (juegos.length > 0) {
+      localStorage.setItem('juegos', JSON.stringify(juegos));  // Guardamos los juegos cada vez que se actualizan
+    }
+  }, [juegos]);
+
   const agregarJuego = (juego: Omit<Game, 'date'>) => {
     const nuevoJuego: Game = {
       ...juego,
-      date: new Date().toISOString().split('T')[0],
+      date: new Date().toISOString().split('T')[0],  // Asignamos la fecha actual
     };
-    setJuegos([...juegos, nuevoJuego]);
-    setMostrarAgregarModal(false);
+    setJuegos([...juegos, nuevoJuego]);  // Agregamos el nuevo juego a la lista
+    setMostrarAgregarModal(false);  // Cerramos el modal
   };
 
-  // Función para iniciar la edición
   const handleEditarClick = (juego: Game, index: number) => {
     setJuegoEnEdicion(juego);
     setJuegoIndexEnEdicion(index);
     setMostrarEditarModal(true);
   };
 
-  // Guardar los cambios del juego editado
   const guardarJuegoEditado = (juegoEditado: Game) => {
     if (juegoIndexEnEdicion !== null) {
       const juegosActualizados = [...juegos];
@@ -64,18 +65,16 @@ const AdminJuegos = () => {
     setJuegoIndexEnEdicion(null);
   };
 
-  // Función para abrir el modal de eliminar
   const handleEliminarClick = (juego: Game) => {
-    setJuegoAEliminar(juego);  // Guardamos el juego a eliminar
-    setMostrarEliminarModal(true);  // Mostramos el modal
+    setJuegoAEliminar(juego);
+    setMostrarEliminarModal(true); 
   };
 
-  // Función para confirmar la eliminación
   const eliminarJuego = () => {
     if (juegoAEliminar) {
-      setJuegos(juegos.filter((juego) => juego.name !== juegoAEliminar.name));  // Eliminamos el juego
-      setMostrarEliminarModal(false);  // Cerramos el modal
-      setJuegoAEliminar(null);  // Reseteamos el estado del juego a eliminar
+      setJuegos(juegos.filter((juego) => juego.name !== juegoAEliminar.name)); 
+      setMostrarEliminarModal(false);
+      setJuegoAEliminar(null); 
     }
   };
 
@@ -124,7 +123,7 @@ const AdminJuegos = () => {
                   />
                   <FaTrash
                     style={{ cursor: 'pointer' }}
-                    onClick={() => handleEliminarClick(juego)}  // Mostramos el modal de eliminar
+                    onClick={() => handleEliminarClick(juego)}
                   />
                 </td>
               </tr>
@@ -152,7 +151,7 @@ const AdminJuegos = () => {
         <EliminarJuego
           juego={juegoAEliminar.name}
           onClose={() => setMostrarEliminarModal(false)}
-          onConfirm={eliminarJuego}  // Confirmamos la eliminación
+          onConfirm={eliminarJuego}
         />
       )}
     </>
