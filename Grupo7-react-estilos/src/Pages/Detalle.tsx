@@ -1,37 +1,58 @@
+import React from 'react';
 import './Detalle.css';
-const Detalle = () => {
+
+const Detalle = ({ juego, visible, onClose }: any) => {
+  if (!visible || !juego) return null;
+
   return (
-    <div className="container">
-      <h1>Elden Ring</h1>
+    <div className="modal-overlay">
+      <div className="modal-content">
+        <button className="close-btn" onClick={onClose}>✖</button>
 
-      <img
-        src="https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1245620/ss_ef61b771ee6b269b1f0cb484233e07a0bfb5f81b.600x338.jpg?t=1744748041"
-        alt="Portada de Elden Ring"
-        style={{ maxWidth: "100%", height: "auto" }}
-      />
+        <div className="detalle-main">
+          <div className="video-container">
+            <iframe
+              width="560"
+              height="315"
+              src={juego.videoUrl}
+              title={juego.nombre}
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          </div>
 
-      <p>Un RPG de acción y mundo abierto desarrollado por FromSoftware, con una historia envolvente creada por Hidetaka Miyazaki y George R.R. Martin.</p>
+          <div className="detalle-info">
+            <h2>{juego.nombre}</h2>
+            <p>{juego.descripcion}</p>
 
-      <div className="video-container">
-        <iframe
-          width="560"
-          height="315"
-          src="https://www.youtube.com/embed/E3Huy2cdih0"
-          title="Tráiler de Elden Ring"
-          allowFullScreen
-        ></iframe>
+            <div className="rating">
+              <div className="stars">
+                {Array.from({ length: 5 }, (_, i) => (
+                  <span key={i}>
+                    {i < Math.floor(juego.rating) ? '★' : '☆'}
+                  </span>
+                ))}
+              </div>
+              <div className="rating-number">{juego.rating.toFixed(1)}</div>
+            </div>
+          </div>
+        </div>
+
+        <div className="galeria">
+          {juego.galeria.map((img: string, idx: number) => (
+            <img
+              key={idx}
+              className="galeria-img"
+              src={img}
+              alt={`${juego.nombre} screenshot ${idx + 1}`}
+            />
+          ))}
+        </div>
       </div>
-
-      <div className="estrellas">⭐⭐⭐⭐⭐</div>
-
-      <h2>Reseñas</h2>
-      <ul>
-        <li>"Una obra maestra del género Souls-like."</li>
-        <li>"Exploración, combate y narrativa en su máximo esplendor."</li>
-        <li>"Impresionante mundo abierto con secretos en cada rincón."</li>
-      </ul>
     </div>
   );
 };
 
 export default Detalle;
+
