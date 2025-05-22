@@ -17,6 +17,7 @@ const juegos = [
       "https://url.imagen3.jpg"
     ],
     rating: 4.5,
+    precio: 0,
   },
   {
     id: 2,
@@ -30,6 +31,7 @@ const juegos = [
       "https://url.imagen6.jpg"
     ],
     rating: 5,
+    precio: 59.99,
   },
   {
     id: 3,
@@ -43,6 +45,7 @@ const juegos = [
       "https://url.imagen3.jpg"
     ],
     rating: 4.5,
+    precio: 0,
   },
   {
     id: 4,
@@ -56,6 +59,7 @@ const juegos = [
       "https://url.imagen6.jpg"
     ],
     rating: 5,
+    precio: 69.99,
   },
   {
     id: 5,
@@ -69,14 +73,16 @@ const juegos = [
       "https://url.imagen3.jpg"
     ],
     rating: 4.5,
+    precio: 0,
   },
 ];
 
 const PaginaPrincipal = () => {
   const navigate = useNavigate();
   const [index, setIndex] = useState(0);
-  const [carrito, setCarrito] = useState<any[]>([]);
+  const [carrito, setCarrito] = useState<{ id: number, nombre: string, imagen: string, cantidad: number, precio: number }[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
+  const [cantidades, setCantidades] = useState<{ [key: number]: number }>({});
   const [detalleJuego, setDetalleJuego] = useState<any>(null);
   const [busqueda, setBusqueda] = useState('');
   const [resultadosBusqueda, setResultadosBusqueda] = useState<any[]>([]);
@@ -89,12 +95,31 @@ const PaginaPrincipal = () => {
     setIndex((prevIndex) => (prevIndex === juegos.length - 1 ? 0 : prevIndex + 1));
   };
 
+  const handleCantidadChange = (id: number, value: number) => {
+    setCantidades((prev) => ({ ...prev, [id]: value }));
+  };
+
   const agregarAlCarrito = (juego: any) => {
-    if (carrito.find(item => item.id === juego.id)) {
-      alert("Este juego ya está en el carrito.");
+    const cantidad = cantidades[juego.id] || 1;
+    if (cantidad <= 0) {
+      alert("La cantidad debe ser al menos 1");
       return;
     }
-    setCarrito((prev) => [...prev, juego]);
+
+    const indexExistente = carrito.findIndex((item) => item.id === juego.id);
+    if (indexExistente !== -1) {
+      const nuevoCarrito = [...carrito];
+      nuevoCarrito[indexExistente].cantidad += cantidad;
+      setCarrito(nuevoCarrito);
+    } else {
+      setCarrito([...carrito, { ...juego, cantidad }]);
+    }
+
+    setCantidades((prev) => ({ ...prev, [juego.id]: 1 }));
+  };
+
+  const eliminarDelCarrito = (id: number) => {
+    setCarrito((prev) => prev.filter((item) => item.id !== id));
   };
 
   const cancelarCarrito = () => {
@@ -120,13 +145,13 @@ const PaginaPrincipal = () => {
   const cerrarDetalle = () => {
     setDetalleJuego(null);
   };
-  
+
   const manejarBusqueda = (valor: string) => {
-  setBusqueda(valor);
-  const resultados = juegos.filter(juego =>
-    juego.nombre.toLowerCase().includes(valor.toLowerCase())
-  );
-  setResultadosBusqueda(resultados);
+    setBusqueda(valor);
+    const resultados = juegos.filter(juego =>
+      juego.nombre.toLowerCase().includes(valor.toLowerCase())
+    );
+    setResultadosBusqueda(resultados);
   };
 
   return (
@@ -150,10 +175,10 @@ const PaginaPrincipal = () => {
           </div>
 
           <input
-          type="text"
-          placeholder="Buscar juegos..."
-          value={busqueda}
-          onChange={(e) => manejarBusqueda(e.target.value)}
+            type="text"
+            placeholder="Buscar juegos..."
+            value={busqueda}
+            onChange={(e) => manejarBusqueda(e.target.value)}
           />
         </nav>
         {busqueda && (
@@ -172,7 +197,7 @@ const PaginaPrincipal = () => {
               <p>No se encontraron juegos.</p>
             )}
           </div>
-)}
+        )}
       </header>
 
       <section className="carousel">
@@ -181,6 +206,13 @@ const PaginaPrincipal = () => {
           <div className="carousel-image">
             <img src={juegos[index].imagen} alt={juegos[index].nombre} />
             <p>{juegos[index].nombre}</p>
+            <p>Precio: ${juegos[index].precio.toFixed(2)}</p>
+            <input
+              type="number"
+              min="1"
+              value={cantidades[juegos[index].id] || 1}
+              onChange={(e) => handleCantidadChange(juegos[index].id, parseInt(e.target.value))}
+            />
             <button onClick={() => agregarAlCarrito(juegos[index])}>Agregar</button>
             <button onClick={() => abrirDetalle(juegos[index])}>Detalles</button>
           </div>
@@ -195,6 +227,13 @@ const PaginaPrincipal = () => {
             <div key={juego.id} className="game-card">
               <img src={juego.imagen} alt={juego.nombre} />
               <h3>{juego.nombre}</h3>
+              <p>Precio: ${juego.precio.toFixed(2)}</p>
+              <input
+                type="number"
+                min="1"
+                value={cantidades[juego.id] || 1}
+                onChange={(e) => handleCantidadChange(juego.id, parseInt(e.target.value))}
+              />
               <button onClick={() => agregarAlCarrito(juego)}>Agregar</button>
               <button onClick={() => abrirDetalle(juego)}>Detalles</button>
             </div>
@@ -203,7 +242,7 @@ const PaginaPrincipal = () => {
       </section>
 
       <section className="cart">
-        <h3>🛒 Shopping Cart (<span>{carrito.length}</span>)</h3>
+        <h3>🛒 Shopping Cart (<span>{carrito.reduce((total, item) => total + item.cantidad, 0)}</span>)</h3>
         <div id="cart-items">
           {carrito.length === 0 ? (
             <p>Tu carrito está vacío</p>
@@ -211,7 +250,8 @@ const PaginaPrincipal = () => {
             carrito.map((item, index) => (
               <div key={index} className="cart-item">
                 <img src={item.imagen} alt={item.nombre} width="50" />
-                <span>{item.nombre}</span>
+                <span>{item.nombre} x{item.cantidad} - ${item.precio.toFixed(2)}</span>
+                <button onClick={() => eliminarDelCarrito(item.id)}>Eliminar</button>
               </div>
             ))
           )}
@@ -229,4 +269,3 @@ const PaginaPrincipal = () => {
 };
 
 export default PaginaPrincipal;
-
