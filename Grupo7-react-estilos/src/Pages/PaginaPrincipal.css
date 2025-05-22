@@ -400,3 +400,32 @@ body {
     width: 90%;
   }
 }
+
+.search-results {
+  background-color: #1e1e1e;
+  padding: 10px;
+  margin: 0 20px;
+  border-radius: 8px;
+}
+.search-results ul {
+  list-style-type: none;
+  padding-left: 0;
+}
+.search-results li {
+  border-bottom: 1px solid #ddd;
+  padding: 5px 0;
+}
+
+.boton-detalles {
+  background-color: rgb(255, 144, 39);
+  color: white;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.boton-detalles:hover {
+  background-color: rgb(142, 81, 23);
+}

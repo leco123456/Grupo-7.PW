@@ -78,6 +78,8 @@ const PaginaPrincipal = () => {
   const [carrito, setCarrito] = useState<any[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [detalleJuego, setDetalleJuego] = useState<any>(null);
+  const [busqueda, setBusqueda] = useState('');
+  const [resultadosBusqueda, setResultadosBusqueda] = useState<any[]>([]);
 
   const handlePrev = () => {
     setIndex((prevIndex) => (prevIndex === 0 ? juegos.length - 1 : prevIndex - 1));
@@ -118,6 +120,14 @@ const PaginaPrincipal = () => {
   const cerrarDetalle = () => {
     setDetalleJuego(null);
   };
+  
+  const manejarBusqueda = (valor: string) => {
+  setBusqueda(valor);
+  const resultados = juegos.filter(juego =>
+    juego.nombre.toLowerCase().includes(valor.toLowerCase())
+  );
+  setResultadosBusqueda(resultados);
+  };
 
   return (
     <div className="pagina-principal">
@@ -139,8 +149,30 @@ const PaginaPrincipal = () => {
             <span role="img" aria-label="user">👤</span>
           </div>
 
-          <input type="text" placeholder="Search..." />
+          <input
+          type="text"
+          placeholder="Buscar juegos..."
+          value={busqueda}
+          onChange={(e) => manejarBusqueda(e.target.value)}
+          />
         </nav>
+        {busqueda && (
+          <div className="search-results">
+            <h3>Resultados para "{busqueda}":</h3>
+            {resultadosBusqueda.length > 0 ? (
+              <ul>
+                {resultadosBusqueda.map(juego => (
+                  <li key={juego.id} style={{ marginBottom: '10px' }}>
+                    <strong>{juego.nombre}</strong>
+                    <button className="boton-detalles" style={{ marginLeft: '10px' }} onClick={() => abrirDetalle(juego)}>Detalles</button>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>No se encontraron juegos.</p>
+            )}
+          </div>
+)}
       </header>
 
       <section className="carousel">
