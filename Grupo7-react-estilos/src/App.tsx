@@ -10,6 +10,10 @@ import ListaVenta from './Pages/ListaVenta';
 import Resena from './Pages/Resena';
 import Detalle from './Pages/Detalle';
 import ResetPass from './Pages/ResetPass';
+import EditarNoticia from './Pages/EditarNoticia';
+import EliminarNoticia from './Pages/EliminarNoticia';
+import Noticias from './Pages/Noticias';
+import AgregarNoticia from './Pages/AgregarNoticia';
 
 function App() {
   return (
