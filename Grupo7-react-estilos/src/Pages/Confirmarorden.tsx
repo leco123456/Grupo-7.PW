@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
 import './ConfirmarOrden.css';
+import type { ItemCarrito } from './PaginaPrincipal'; // o desde donde definas ItemCarrito
 
-interface Props {
+interface ConfirmarOrdenProps {
   visible: boolean;
   onClose: () => void;
+  carrito: ItemCarrito[];
+  total: number;
 }
 
-const ConfirmarOrden: React.FC<Props> = ({ visible, onClose }) => {
+const ConfirmarOrden: React.FC<ConfirmarOrdenProps> = ({ visible, onClose, carrito, total }) => {
   const [purchaseCompleted, setPurchaseCompleted] = useState(false);
 
   if (!visible) return null;

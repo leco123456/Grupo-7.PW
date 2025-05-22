@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ConfirmarOrden from './Confirmarorden';
 import Detalle from './Detalle';
 import './PaginaPrincipal.css';
 
+// Datos de juegos - Idealmente esto vendría de una API
 const juegos = [
   {
     id: 1,
@@ -17,7 +18,8 @@ const juegos = [
       "https://url.imagen3.jpg"
     ],
     rating: 4.5,
-    precio: 0,
+    precio: 9.99, // Cambiado, ya no es gratis
+    categoria: "Cooperativo"
   },
   {
     id: 2,
@@ -32,6 +34,7 @@ const juegos = [
     ],
     rating: 5,
     precio: 59.99,
+    categoria: "Aventura"
   },
   {
     id: 3,
@@ -45,14 +48,15 @@ const juegos = [
       "https://url.imagen3.jpg"
     ],
     rating: 4.5,
-    precio: 0,
+    precio: 19.99, // Cambiado, ya no es gratis
+    categoria: "FPS"
   },
   {
     id: 4,
     nombre: "Red Dead Redemption 2",
     imagen: "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/1174180/header.jpg?t=1720558643",
     videoUrl: "https://www.youtube.com/embed/someVideoID2",
-    descripcion: "Una épica aventura de Kratos y Atreus en la mitología nórdica.",
+    descripcion: "Una historia épica del salvaje oeste con Arthur Morgan y la banda de Dutch van der Linde.",
     galeria: [
       "https://url.imagen4.jpg",
       "https://url.imagen5.jpg",
@@ -60,6 +64,7 @@ const juegos = [
     ],
     rating: 5,
     precio: 69.99,
+    categoria: "Aventura"
   },
   {
     id: 5,
@@ -73,197 +78,536 @@ const juegos = [
       "https://url.imagen3.jpg"
     ],
     rating: 4.5,
-    precio: 0,
+    precio: 14.99, // Cambiado, ya no es gratis
+    categoria: "Multijugador"
   },
+  // Puedes agregar más juegos para llenar la cuadrícula 4x2 si lo deseas
 ];
 
-const PaginaPrincipal = () => {
+// Tipos TypeScript para mejor tipado
+interface Juego {
+  id: number;
+  nombre: string;
+  imagen: string;
+  videoUrl: string;
+  descripcion: string;
+  galeria: string[];
+  rating: number;
+  precio: number;
+  categoria: string;
+}
+
+export interface ItemCarrito extends Juego {
+  cantidad: number;
+}
+
+const PaginaPrincipal: React.FC = () => {
   const navigate = useNavigate();
+  
+  // Estados principales
   const [index, setIndex] = useState(0);
-  const [carrito, setCarrito] = useState<{ id: number, nombre: string, imagen: string, cantidad: number, precio: number }[]>([]);
+  const [carrito, setCarrito] = useState<ItemCarrito[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
-  const [cantidades, setCantidades] = useState<{ [key: number]: number }>({});
-  const [detalleJuego, setDetalleJuego] = useState<any>(null);
+  const [cantidades, setCantidades] = useState<Record<number, number>>({});
+  const [detalleJuego, setDetalleJuego] = useState<Juego | null>(null);
   const [busqueda, setBusqueda] = useState('');
-  const [resultadosBusqueda, setResultadosBusqueda] = useState<any[]>([]);
+  const [categoriaFiltro, setCategoriaFiltro] = useState('todas');
+  const [ordenamiento, setOrdenamiento] = useState('nombre');
+  
+  // Estados para la interfaz
+  const [cargando, setCargando] = useState(false);
+  const [mensaje, setMensaje] = useState('');
 
-  const handlePrev = () => {
-    setIndex((prevIndex) => (prevIndex === 0 ? juegos.length - 1 : prevIndex - 1));
+  // Auto-avance del carrusel
+  useEffect(() => {
+    const intervalo = setInterval(() => {
+      setIndex(prevIndex => (prevIndex === juegos.length - 1 ? 0 : prevIndex + 1));
+    }, 5000);
+
+    return () => clearInterval(intervalo);
+  }, []);
+
+  // Persistir carrito en localStorage
+  useEffect(() => {
+    const carritoGuardado = localStorage.getItem('carrito');
+    if (carritoGuardado) {
+      setCarrito(JSON.parse(carritoGuardado));
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('carrito', JSON.stringify(carrito));
+  }, [carrito]);
+
+  // Funciones del carrusel
+  const handlePrev = useCallback(() => {
+    setIndex(prevIndex => (prevIndex === 0 ? juegos.length - 1 : prevIndex - 1));
+  }, []);
+
+  const handleNext = useCallback(() => {
+    setIndex(prevIndex => (prevIndex === juegos.length - 1 ? 0 : prevIndex + 1));
+  }, []);
+
+  // Función para mostrar mensajes temporales
+  const mostrarMensaje = (texto: string, tipo: 'success' | 'error' | 'info' = 'info') => {
+    setMensaje(texto);
+    setTimeout(() => setMensaje(''), 3000);
   };
 
-  const handleNext = () => {
-    setIndex((prevIndex) => (prevIndex === juegos.length - 1 ? 0 : prevIndex + 1));
-  };
+  // Gestión de cantidades
+  const handleCantidadChange = useCallback((id: number, value: number) => {
+    if (value < 1) return;
+    setCantidades(prev => ({ ...prev, [id]: value }));
+  }, []);
 
-  const handleCantidadChange = (id: number, value: number) => {
-    setCantidades((prev) => ({ ...prev, [id]: value }));
-  };
-
-  const agregarAlCarrito = (juego: any) => {
+  // Agregar al carrito mejorado
+  const agregarAlCarrito = useCallback((juego: Juego) => {
     const cantidad = cantidades[juego.id] || 1;
+    
     if (cantidad <= 0) {
-      alert("La cantidad debe ser al menos 1");
+      mostrarMensaje("La cantidad debe ser al menos 1", 'error');
       return;
     }
 
-    const indexExistente = carrito.findIndex((item) => item.id === juego.id);
-    if (indexExistente !== -1) {
-      const nuevoCarrito = [...carrito];
-      nuevoCarrito[indexExistente].cantidad += cantidad;
-      setCarrito(nuevoCarrito);
-    } else {
-      setCarrito([...carrito, { ...juego, cantidad }]);
+    setCarrito(prevCarrito => {
+      const itemExistente = prevCarrito.find(item => item.id === juego.id);
+      
+      if (itemExistente) {
+        return prevCarrito.map(item =>
+          item.id === juego.id 
+            ? { ...item, cantidad: item.cantidad + cantidad }
+            : item
+        );
+      } else {
+        return [...prevCarrito, { ...juego, cantidad }];
+      }
+    });
+
+    setCantidades(prev => ({ ...prev, [juego.id]: 1 }));
+    mostrarMensaje(`${juego.nombre} agregado al carrito`, 'success');
+  }, [cantidades]);
+
+  // Eliminar del carrito
+  const eliminarDelCarrito = useCallback((id: number) => {
+    setCarrito(prev => prev.filter(item => item.id !== id));
+    mostrarMensaje("Producto eliminado del carrito", 'info');
+  }, []);
+
+  // Actualizar cantidad en carrito
+  const actualizarCantidadCarrito = useCallback((id: number, nuevaCantidad: number) => {
+    if (nuevaCantidad <= 0) {
+      eliminarDelCarrito(id);
+      return;
     }
+    
+    setCarrito(prev => 
+      prev.map(item => 
+        item.id === id ? { ...item, cantidad: nuevaCantidad } : item
+      )
+    );
+  }, [eliminarDelCarrito]);
 
-    setCantidades((prev) => ({ ...prev, [juego.id]: 1 }));
-  };
-
-  const eliminarDelCarrito = (id: number) => {
-    setCarrito((prev) => prev.filter((item) => item.id !== id));
-  };
-
-  const cancelarCarrito = () => {
+  // Cancelar carrito
+  const cancelarCarrito = useCallback(() => {
     if (carrito.length === 0) return;
-    const confirmacion = window.confirm("¿Estás seguro de que deseas cancelar la orden?");
-    if (confirmacion) setCarrito([]);
-  };
+    
+    const confirmacion = window.confirm("¿Estás seguro de que deseas vaciar el carrito?");
+    if (confirmacion) {
+      setCarrito([]);
+      mostrarMensaje("Carrito vaciado", 'info');
+    }
+  }, [carrito.length]);
 
-  const abrirModalOrden = () => {
+  // Modal de orden
+  const abrirModalOrden = useCallback(() => {
     if (carrito.length === 0) {
-      alert("El carrito está vacío. Agrega al menos un juego para confirmar la orden.");
+      mostrarMensaje("El carrito está vacío. Agrega al menos un juego para confirmar la orden.", 'error');
       return;
     }
     setModalVisible(true);
-  };
+  }, [carrito.length]);
 
-  const cerrarModalOrden = () => setModalVisible(false);
+  const cerrarModalOrden = useCallback(() => {
+    setModalVisible(false);
+  }, []);
 
-  const abrirDetalle = (juego: any) => {
+  // Detalles del juego
+  const abrirDetalle = useCallback((juego: Juego) => {
     setDetalleJuego(juego);
-  };
+  }, []);
 
-  const cerrarDetalle = () => {
+  const cerrarDetalle = useCallback(() => {
     setDetalleJuego(null);
-  };
+  }, []);
 
-  const manejarBusqueda = (valor: string) => {
-    setBusqueda(valor);
-    const resultados = juegos.filter(juego =>
-      juego.nombre.toLowerCase().includes(valor.toLowerCase())
-    );
-    setResultadosBusqueda(resultados);
-  };
+  // Filtros y búsqueda optimizados
+  const juegosFiltrados = useMemo(() => {
+    let resultado = juegos;
+
+    // Filtrar por búsqueda
+    if (busqueda.trim()) {
+      resultado = resultado.filter(juego =>
+        juego.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
+        juego.descripcion.toLowerCase().includes(busqueda.toLowerCase()) ||
+        juego.categoria.toLowerCase().includes(busqueda.toLowerCase())
+      );
+    }
+
+    // Filtrar por categoría
+    if (categoriaFiltro !== 'todas') {
+      resultado = resultado.filter(juego => 
+        juego.categoria.toLowerCase() === categoriaFiltro.toLowerCase()
+      );
+    }
+
+    // Ordenar
+    resultado.sort((a, b) => {
+      switch (ordenamiento) {
+        case 'precio-asc':
+          return a.precio - b.precio;
+        case 'precio-desc':
+          return b.precio - a.precio;
+        case 'rating':
+          return b.rating - a.rating;
+        case 'nombre':
+        default:
+          return a.nombre.localeCompare(b.nombre);
+      }
+    });
+
+    return resultado;
+  }, [busqueda, categoriaFiltro, ordenamiento]);
+
+  // Obtener categorías únicas
+  const categorias = useMemo(() => {
+    const cats = Array.from(new Set(juegos.map(juego => juego.categoria)));
+    return ['todas', ...cats];
+  }, []);
+
+  // Calcular totales del carrito
+  const totalCarrito = useMemo(() => {
+    return carrito.reduce((total, item) => total + (item.precio * item.cantidad), 0);
+  }, [carrito]);
+
+  const totalItems = useMemo(() => {
+    return carrito.reduce((total, item) => total + item.cantidad, 0);
+  }, [carrito]);
 
   return (
     <div className="pagina-principal">
+      {/* Mensaje temporal */}
+      {mensaje && (
+        <div className={`mensaje-temporal ${mensaje.includes('error') ? 'error' : 'success'}`}>
+          {mensaje}
+        </div>
+      )}
+
       <header>
-        <h1>Catálogo de Juegos</h1>
+        <h1>🎮 Catálogo de Juegos</h1>
         <nav className="navbar">
-          <button>Explore</button>
-          <button>Categories</button>
-          <button onClick={() => navigate('/paginaprincipal')}>Home</button>
-          <button>Platform</button>
-          <button>Special Offers</button>
+          <button>Explorar</button>
+          <button>Categorías</button>
+          <button onClick={() => navigate('/paginaprincipal')} className="active">Inicio</button>
+          <button>Plataformas</button>
+          <button>Ofertas Especiales</button>
 
           <div
             className="nav-icons"
             onClick={() => navigate('/adminjuegos')}
-            title="Admin Panel"
-            style={{ cursor: 'pointer' }}
+            title="Panel de Administración"
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => e.key === 'Enter' && navigate('/adminjuegos')}
           >
-            <span role="img" aria-label="user">👤</span>
+            <span role="img" aria-label="usuario">👤</span>
           </div>
+        </nav>
 
+        {/* Barra de búsqueda y filtros mejorada */}
+        <div className="search-filters">
           <input
             type="text"
-            placeholder="Buscar juegos..."
+            placeholder="Buscar juegos por nombre, descripción o categoría..."
             value={busqueda}
-            onChange={(e) => manejarBusqueda(e.target.value)}
+            onChange={(e) => setBusqueda(e.target.value)}
+            className="search-input"
           />
-        </nav>
+          
+          <select 
+            value={categoriaFiltro} 
+            onChange={(e) => setCategoriaFiltro(e.target.value)}
+            className="filter-select"
+          >
+            {categorias.map(cat => (
+              <option key={cat} value={cat}>
+                {cat === 'todas' ? 'Todas las Categorías' : cat}
+              </option>
+            ))}
+          </select>
+
+          <select 
+            value={ordenamiento} 
+            onChange={(e) => setOrdenamiento(e.target.value)}
+            className="sort-select"
+          >
+            <option value="nombre">Ordenar por Nombre</option>
+            <option value="precio-asc">Precio: Menor a Mayor</option>
+            <option value="precio-desc">Precio: Mayor a Menor</option>
+            <option value="rating">Mejor Calificación</option>
+          </select>
+        </div>
+
+        {/* Resultados de búsqueda */}
         {busqueda && (
           <div className="search-results">
-            <h3>Resultados para "{busqueda}":</h3>
-            {resultadosBusqueda.length > 0 ? (
-              <ul>
-                {resultadosBusqueda.map(juego => (
-                  <li key={juego.id} style={{ marginBottom: '10px' }}>
-                    <strong>{juego.nombre}</strong>
-                    <button className="boton-detalles" style={{ marginLeft: '10px' }} onClick={() => abrirDetalle(juego)}>Detalles</button>
-                  </li>
+            <h3>Resultados para "{busqueda}" ({juegosFiltrados.length} encontrados):</h3>
+            {juegosFiltrados.length > 0 ? (
+              <div className="results-grid">
+                {juegosFiltrados.slice(0, 6).map(juego => (
+                  <div key={juego.id} className="result-card">
+                    <img src={juego.imagen} alt={juego.nombre} />
+                    <div className="result-info">
+                      <strong>{juego.nombre}</strong>
+                      <p className="categoria">{juego.categoria}</p>
+                      <p className="precio">
+                        <span>${juego.precio.toFixed(2)}</span>
+                      </p>
+                      <button 
+                        className="boton-detalles" 
+                        onClick={() => abrirDetalle(juego)}
+                      >
+                        Ver Detalles
+                      </button>
+                    </div>
+                  </div>
                 ))}
-              </ul>
+              </div>
             ) : (
-              <p>No se encontraron juegos.</p>
+              <p className="no-results">No se encontraron juegos que coincidan con tu búsqueda.</p>
             )}
           </div>
         )}
       </header>
 
+      {/* Carrusel mejorado */}
       <section className="carousel">
-        <button className="carousel-btn" onClick={handlePrev}>⬅</button>
-        <div className="carousel-images">
+        <button 
+          className="carousel-btn prev" 
+          onClick={handlePrev}
+          aria-label="Juego anterior"
+        >
+          ⬅
+        </button>
+        
+        <div className="carousel-container">
           <div className="carousel-image">
-            <img src={juegos[index].imagen} alt={juegos[index].nombre} />
-            <p>{juegos[index].nombre}</p>
-            <p>Precio: ${juegos[index].precio.toFixed(2)}</p>
-            <input
-              type="number"
-              min="1"
-              value={cantidades[juegos[index].id] || 1}
-              onChange={(e) => handleCantidadChange(juegos[index].id, parseInt(e.target.value))}
+            <img 
+              src={juegos[index].imagen} 
+              alt={juegos[index].nombre}
+              loading="lazy"
             />
-            <button onClick={() => agregarAlCarrito(juegos[index])}>Agregar</button>
-            <button onClick={() => abrirDetalle(juegos[index])}>Detalles</button>
+            <div className="carousel-overlay">
+              <h3>{juegos[index].nombre}</h3>
+              <p className="descripcion">{juegos[index].descripcion}</p>
+              <div className="rating">
+                {'⭐'.repeat(Math.floor(juegos[index].rating))} 
+                <span>({juegos[index].rating})</span>
+              </div>
+              <p className="precio-carousel">
+                <span>${juegos[index].precio.toFixed(2)}</span>
+              </p>
+              <div className="carousel-actions">
+                <input
+                  type="number"
+                  min="1"
+                  max="10"
+                  value={cantidades[juegos[index].id] || 1}
+                  onChange={(e) => handleCantidadChange(juegos[index].id, parseInt(e.target.value) || 1)}
+                  className="cantidad-input"
+                />
+                <button 
+                  onClick={() => agregarAlCarrito(juegos[index])}
+                  className="boton-agregar"
+                >
+                  🛒 Agregar
+                </button>
+                <button 
+                  onClick={() => abrirDetalle(juegos[index])}
+                  className="boton-detalles"
+                >
+                  📋 Detalles
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          {/* Indicadores del carrusel */}
+          <div className="carousel-indicators">
+            {juegos.map((_, i) => (
+              <button
+                key={i}
+                className={`indicator ${i === index ? 'active' : ''}`}
+                onClick={() => setIndex(i)}
+                aria-label={`Ir al juego ${i + 1}`}
+              />
+            ))}
           </div>
         </div>
-        <button className="carousel-btn" onClick={handleNext}>➡</button>
+        
+        <button 
+          className="carousel-btn next" 
+          onClick={handleNext}
+          aria-label="Siguiente juego"
+        >
+          ➡
+        </button>
       </section>
 
+      {/* Lista de juegos destacados */}
       <section className="featured">
-        <h2>Featured Games</h2>
-        <div className="games-list">
-          {juegos.map(juego => (
+        <h2>🔥 Juegos Destacados</h2>
+        <div className="games-grid">
+          {juegosFiltrados.map(juego => (
             <div key={juego.id} className="game-card">
-              <img src={juego.imagen} alt={juego.nombre} />
-              <h3>{juego.nombre}</h3>
-              <p>Precio: ${juego.precio.toFixed(2)}</p>
-              <input
-                type="number"
-                min="1"
-                value={cantidades[juego.id] || 1}
-                onChange={(e) => handleCantidadChange(juego.id, parseInt(e.target.value))}
-              />
-              <button onClick={() => agregarAlCarrito(juego)}>Agregar</button>
-              <button onClick={() => abrirDetalle(juego)}>Detalles</button>
+              <div className="card-image">
+                <img src={juego.imagen} alt={juego.nombre} loading="lazy" />
+              </div>
+              
+              <div className="card-content">
+                <h3>{juego.nombre}</h3>
+                <p className="categoria">{juego.categoria}</p>
+                <div className="rating">
+                  {'⭐'.repeat(Math.floor(juego.rating))} 
+                  <span>({juego.rating})</span>
+                </div>
+                <p className="precio">
+                  <span>${juego.precio.toFixed(2)}</span>
+                </p>
+                
+                <div className="card-actions">
+                  <div className="cantidad-control">
+                    <button 
+                      onClick={() => handleCantidadChange(juego.id, (cantidades[juego.id] || 1) - 1)}
+                      disabled={(cantidades[juego.id] || 1) <= 1}
+                    >
+                      -
+                    </button>
+                    <span>{cantidades[juego.id] || 1}</span>
+                    <button 
+                      onClick={() => handleCantidadChange(juego.id, (cantidades[juego.id] || 1) + 1)}
+                      disabled={(cantidades[juego.id] || 1) >= 10}
+                    >
+                      +
+                    </button>
+                  </div>
+                  
+                  <button 
+                    onClick={() => agregarAlCarrito(juego)}
+                    className="boton-agregar"
+                  >
+                    🛒 Agregar
+                  </button>
+                  <button 
+                    onClick={() => abrirDetalle(juego)}
+                    className="boton-detalles"
+                  >
+                    📋 Detalles
+                  </button>
+                </div>
+              </div>
             </div>
           ))}
         </div>
       </section>
 
+      {/* Carrito de compras mejorado */}
       <section className="cart">
-        <h3>🛒 Shopping Cart (<span>{carrito.reduce((total, item) => total + item.cantidad, 0)}</span>)</h3>
-        <div id="cart-items">
+        <div className="cart-header">
+          <h3>
+            🛒 Carrito de Compras 
+            <span className="cart-count">({totalItems})</span>
+          </h3>
+          <p className="cart-total">Total: ${totalCarrito.toFixed(2)}</p>
+        </div>
+        
+        <div className="cart-items">
           {carrito.length === 0 ? (
-            <p>Tu carrito está vacío</p>
+            <div className="cart-empty">
+              <p>🛒 Tu carrito está vacío</p>
+              <p>¡Explora nuestro catálogo y encuentra juegos increíbles!</p>
+            </div>
           ) : (
-            carrito.map((item, index) => (
-              <div key={index} className="cart-item">
-                <img src={item.imagen} alt={item.nombre} width="50" />
-                <span>{item.nombre} x{item.cantidad} - ${item.precio.toFixed(2)}</span>
-                <button onClick={() => eliminarDelCarrito(item.id)}>Eliminar</button>
+            carrito.map((item) => (
+              <div key={item.id} className="cart-item">
+                <img src={item.imagen} alt={item.nombre} />
+                <div className="item-details">
+                  <h4>{item.nombre}</h4>
+                  <p className="item-precio">${item.precio.toFixed(2)} c/u</p>
+                </div>
+                <div className="item-quantity">
+                  <button 
+                    onClick={() => actualizarCantidadCarrito(item.id, item.cantidad - 1)}
+                    disabled={item.cantidad <= 1}
+                  >
+                    -
+                  </button>
+                  <span>{item.cantidad}</span>
+                  <button 
+                    onClick={() => actualizarCantidadCarrito(item.id, item.cantidad + 1)}
+                    disabled={item.cantidad >= 10}
+                  >
+                    +
+                  </button>
+                </div>
+                <div className="item-total">
+                  ${(item.precio * item.cantidad).toFixed(2)}
+                </div>
+                <button 
+                  onClick={() => eliminarDelCarrito(item.id)}
+                  className="boton-eliminar"
+                  title="Eliminar del carrito"
+                >
+                  🗑️
+                </button>
               </div>
             ))
           )}
         </div>
-        <div className="cart-actions">
-          <button onClick={abrirModalOrden}>✔ Confirmar Orden</button>
-          <button onClick={cancelarCarrito}>✖ Cancelar Orden</button>
-        </div>
+        
+        {carrito.length > 0 && (
+          <div className="cart-actions">
+            <button 
+              onClick={abrirModalOrden}
+              className="boton-confirmar"
+              disabled={cargando}
+            >
+              ✔ Confirmar Orden ({totalItems} items)
+            </button>
+            <button 
+              onClick={cancelarCarrito}
+              className="boton-cancelar"
+              disabled={cargando}
+            >
+              🗑️ Vaciar Carrito
+            </button>
+          </div>
+        )}
       </section>
 
-      <ConfirmarOrden visible={modalVisible} onClose={cerrarModalOrden} />
-      <Detalle juego={detalleJuego} visible={!!detalleJuego} onClose={cerrarDetalle} />
+      {/* Modales */}
+      <ConfirmarOrden 
+        visible={modalVisible} 
+        onClose={cerrarModalOrden}
+        carrito={carrito}
+        total={totalCarrito}
+      />
+      
+      <Detalle 
+        juego={detalleJuego} 
+        visible={!!detalleJuego} 
+        onClose={cerrarDetalle}
+        onAgregarCarrito={agregarAlCarrito}
+      />
     </div>
   );
 };

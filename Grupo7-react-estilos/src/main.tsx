@@ -4,11 +4,14 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter } from 'react-router-dom';
 
 import App from "./App";
+import { JuegoProvider } from './Pages/JuegoProvider'; // ✅ Asegúrate de que esta ruta sea correcta
 
 createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <BrowserRouter>
-      <App />
+      <JuegoProvider> {/* ✅ Aquí envuelves toda tu app con el provider */}
+        <App />
+      </JuegoProvider>
     </BrowserRouter>
   </React.StrictMode>
 );

@@ -173,3 +173,6 @@ td svg:hover {
 .modal-buttons button:hover {
   opacity: 0.9;
 }
+.modal-buttons button[type="submit"]:hover {
+  background-color: #45a049;
+}
