@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react';
 import AgregarJuego from './AgregarJuego';
 import EditarJuego from './EditarJuego';
 import EliminarJuego from './EliminarJuego';
-import { FaEdit, FaTrash } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaSync } from 'react-icons/fa';
+import { useGameState } from './gameStateManager';
 import './AdminJuegos.css';
 
+// INTERFAZ ACTUALIZADA - Ahora incluye videoUrl
 interface Game {
   name: string;
   description: string;
@@ -13,76 +15,22 @@ interface Game {
   discount: number;
   photo: string;
   date: string;
+  rating?: number;      // Agregado
+  videoUrl?: string;    // AGREGADO - ESTO ES LO QUE FALTABA
 }
 
-const juegosIniciales: Game[] = [
-  {
-    name: "Sven Co-op",
-    description: "Sven Co-op es un mod cooperativo para Half-Life que te permite jugar en equipo con amigos.",
-    category: "Cooperativo",
-    price: 9.99,
-    discount: 0,
-    photo: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/225840/header.jpg?t=1735034103",
-    date: "2023-01-01"
-  },
-  {
-    name: "God of War",
-    description: "Una épica aventura de Kratos y Atreus en la mitología nórdica.",
-    category: "Aventura",
-    price: 59.99,
-    discount: 0,
-    photo: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1593500/header.jpg?t=1729030762",
-    date: "2023-01-02"
-  },
-  {
-    name: "Counter Strike 2",
-    description: "Durante las dos últimas décadas, Counter‑Strike ha proporcionado una experiencia competitiva de primer nivel...",
-    category: "FPS",
-    price: 19.99,
-    discount: 0,
-    photo: "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/730/header.jpg?t=1745368595",
-    date: "2023-01-03"
-  },
-  {
-    name: "Red Dead Redemption 2",
-    description: "Una historia épica del salvaje oeste con Arthur Morgan y la banda de Dutch van der Linde.",
-    category: "Aventura",
-    price: 69.99,
-    discount: 0,
-    photo: "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/1174180/header.jpg?t=1720558643",
-    date: "2023-01-04"
-  },
-  {
-    name: "Gang Beasts",
-    description: "Gang Beasts es un desternillante juego multijugador de peleas absurdas entre personajes gelatinosos y gruñones.",
-    category: "Multijugador",
-    price: 14.99,
-    discount: 0,
-    photo: "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/285900/header.jpg?t=1732109683",
-    date: "2023-01-05"
-  }
-  // ...agrega más si tienes
-];
-
 const AdminJuegos = () => {
-  const [juegos, setJuegos] = useState<Game[]>(() => {
-    const juegosGuardados = localStorage.getItem('juegos');
-    if (juegosGuardados) {
-      try {
-        const juegosParseados = JSON.parse(juegosGuardados);
-        // Si está vacío, vuelve a cargar los juegos iniciales
-        if (Array.isArray(juegosParseados) && juegosParseados.length > 0) {
-          return juegosParseados;
-        }
-      } catch (e) {}
-    }
-    // Si no hay juegos o están vacíos, inicializa con los juegos por defecto
-    localStorage.setItem('juegos', JSON.stringify(juegosIniciales));
-    return juegosIniciales;
-  });
-
+  const { 
+    getGamesForAdmin, 
+    addGameFromAdmin, 
+    updateGameFromAdmin, 
+    deleteGameFromAdmin,
+    resetToInitialGames 
+  } = useGameState();
+  
+  const [juegos, setJuegos] = useState<Game[]>([]);
   const [juegoEnEdicion, setJuegoEnEdicion] = useState<Game | null>(null);
-  const [indexEnEdicion, setIndexEnEdicion] = useState<number | null>(null);
+  const [juegoOriginalDate, setJuegoOriginalDate] = useState<string | null>(null);
   const [juegoAEliminar, setJuegoAEliminar] = useState<Game | null>(null);
 
   const [mostrarAgregar, setMostrarAgregar] = useState(false);
@@ -98,38 +46,67 @@ const AdminJuegos = () => {
     }
   }, []);
 
-  // 💾 Guardar juegos cada vez que cambian
+  // 🔄 Cargar juegos del estado centralizado
   useEffect(() => {
-    localStorage.setItem('juegos', JSON.stringify(juegos));
-  }, [juegos]);
+    const loadGames = () => {
+      const gamesFromState = getGamesForAdmin();
+      setJuegos(gamesFromState);
+    };
+    
+    loadGames();
+    
+    // Configurar un listener para cambios en el localStorage
+    const handleStorageChange = () => {
+      loadGames();
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    
+    // También escuchar cambios internos (cuando se modifica desde este mismo componente)
+    const interval = setInterval(loadGames, 1000); // Revisar cada segundo
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      clearInterval(interval);
+    };
+  }, [getGamesForAdmin]);
 
   // ➕ Agregar juego nuevo
   const agregarJuego = (nuevoJuego: Omit<Game, 'date'>) => {
-    const juegoConFecha: Game = {
-      ...nuevoJuego,
-      date: new Date().toISOString().split('T')[0],
-    };
-    setJuegos([...juegos, juegoConFecha]);
+    console.log('🎮 Agregando juego con videoUrl:', nuevoJuego.videoUrl); // Debug
+    addGameFromAdmin(nuevoJuego);
     setMostrarAgregar(false);
+    
+    // Recargar la lista después de agregar
+    setTimeout(() => {
+      const gamesFromState = getGamesForAdmin();
+      setJuegos(gamesFromState);
+    }, 100);
   };
 
   // ✏️ Preparar edición
-  const handleEditar = (juego: Game, index: number) => {
+  const handleEditar = (juego: Game) => {
+    console.log('✏️ Editando juego con videoUrl:', juego.videoUrl); // Debug
     setJuegoEnEdicion(juego);
-    setIndexEnEdicion(index);
+    setJuegoOriginalDate(juego.date); // Guardamos la fecha original como identificador
     setMostrarEditar(true);
   };
 
   // 💾 Guardar cambios de edición
   const guardarEdicion = (juegoEditado: Game) => {
-    if (indexEnEdicion !== null) {
-      const copia = [...juegos];
-      copia[indexEnEdicion] = juegoEditado;
-      setJuegos(copia);
+    console.log('💾 Guardando juego editado con videoUrl:', juegoEditado.videoUrl); // Debug
+    if (juegoOriginalDate) {
+      updateGameFromAdmin(juegoOriginalDate, juegoEditado);
     }
     setMostrarEditar(false);
     setJuegoEnEdicion(null);
-    setIndexEnEdicion(null);
+    setJuegoOriginalDate(null);
+    
+    // Recargar la lista después de editar
+    setTimeout(() => {
+      const gamesFromState = getGamesForAdmin();
+      setJuegos(gamesFromState);
+    }, 100);
   };
 
   // 🗑️ Confirmar eliminación
@@ -140,11 +117,39 @@ const AdminJuegos = () => {
 
   const eliminarJuego = () => {
     if (juegoAEliminar) {
-      const actualizados = juegos.filter(j => j.date !== juegoAEliminar.date);
-      setJuegos(actualizados);
+      deleteGameFromAdmin(juegoAEliminar.date);
     }
     setMostrarEliminar(false);
     setJuegoAEliminar(null);
+    
+    // Recargar la lista después de eliminar
+    setTimeout(() => {
+      const gamesFromState = getGamesForAdmin();
+      setJuegos(gamesFromState);
+    }, 100);
+  };
+
+  // 🔄 Sincronizar manualmente
+  const sincronizarJuegos = () => {
+    const gamesFromState = getGamesForAdmin();
+    setJuegos(gamesFromState);
+    alert('Juegos sincronizados correctamente');
+  };
+
+  // 🔄 Resetear juegos a valores iniciales
+  const resetearJuegos = () => {
+    const confirmacion = window.confirm(
+      '¿Estás seguro de que deseas resetear todos los juegos a los valores iniciales? Esta acción no se puede deshacer.'
+    );
+    
+    if (confirmacion) {
+      resetToInitialGames();
+      setTimeout(() => {
+        const gamesFromState = getGamesForAdmin();
+        setJuegos(gamesFromState);
+      }, 100);
+      alert('Juegos reseteados correctamente');
+    }
   };
 
   // 🚪 Cerrar sesión
@@ -172,6 +177,30 @@ const AdminJuegos = () => {
 
         <div className="actions">
           <button onClick={() => setMostrarAgregar(true)}>+ Agregar Juego</button>
+          <button onClick={sincronizarJuegos} title="Sincronizar juegos">
+            <FaSync /> Sincronizar
+          </button>
+          <button 
+            onClick={resetearJuegos} 
+            title="Resetear a juegos iniciales"
+            style={{ backgroundColor: '#dc3545', marginLeft: '10px' }}
+          >
+            🔄 Resetear
+          </button>
+        </div>
+
+        <div className="info-panel" style={{
+          background: '#f8f9fa',
+          padding: '10px',
+          borderRadius: '5px',
+          margin: '10px 0',
+          border: '1px solid #dee2e6'
+        }}>
+          <p><strong>ℹ️ Estado de Sincronización:</strong></p>
+          <p>• Total de juegos: <strong>{juegos.length}</strong></p>
+          <p>• Los cambios aquí se reflejan automáticamente en la página principal</p>
+          <p>• Si no ves los cambios, haz clic en "Sincronizar"</p>
+          <p>• <strong>Nuevos campos soportados:</strong> Rating y VideoUrl</p>
         </div>
 
         {juegos.length === 0 ? (
@@ -185,25 +214,36 @@ const AdminJuegos = () => {
                 <th>Nombre</th>
                 <th>Precio</th>
                 <th>Descuento</th>
+                <th>Rating</th>
+                <th>Video</th>
                 <th>Acciones</th>
               </tr>
             </thead>
             <tbody>
               {juegos.map((juego, index) => (
-                <tr key={index}>
+                <tr key={`${juego.date}-${index}`}>
                   <td>{juego.date}</td>
                   <td>{juego.category}</td>
                   <td>{juego.name}</td>
                   <td>${juego.price.toFixed(2)}</td>
                   <td>{juego.discount}%</td>
+                  <td>{juego.rating ? `⭐ ${juego.rating}` : 'N/A'}</td>
+                  <td>
+                    {juego.videoUrl ? 
+                      <span style={{ color: 'green', fontSize: '12px' }}>✅ Sí</span> : 
+                      <span style={{ color: 'red', fontSize: '12px' }}>❌ No</span>
+                    }
+                  </td>
                   <td>
                     <FaEdit
                       className="icon edit"
-                      onClick={() => handleEditar(juego, index)}
+                      onClick={() => handleEditar(juego)}
+                      title="Editar juego"
                     />
                     <FaTrash
                       className="icon delete"
                       onClick={() => handleEliminar(juego)}
+                      title="Eliminar juego"
                     />
                   </td>
                 </tr>

@@ -2,87 +2,8 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ConfirmarOrden from './Confirmarorden';
 import Detalle from './Detalle';
+import { useGameState } from './gameStateManager';
 import './PaginaPrincipal.css';
-
-// Datos de juegos - Idealmente esto vendría de una API
-const juegos = [
-  {
-    id: 1,
-    nombre: "Sven Co-op",
-    imagen: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/225840/header.jpg?t=1735034103",
-    videoUrl: "https://www.youtube.com/embed/someVideoID1",
-    descripcion: "Sven Co-op es un mod cooperativo para Half-Life que te permite jugar en equipo con amigos.",
-    galeria: [
-      "https://url.imagen1.jpg",
-      "https://url.imagen2.jpg",
-      "https://url.imagen3.jpg"
-    ],
-    rating: 4.5,
-    precio: 9.99, // Cambiado, ya no es gratis
-    categoria: "Cooperativo"
-  },
-  {
-    id: 2,
-    nombre: "God of War",
-    imagen: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1593500/header.jpg?t=1729030762",
-    videoUrl: "https://www.youtube.com/embed/K0u_kAWLJOA",
-    descripcion: "Una épica aventura de Kratos y Atreus en la mitología nórdica.",
-    galeria: [
-      "https://url.imagen4.jpg",
-      "https://url.imagen5.jpg",
-      "https://url.imagen6.jpg"
-    ],
-    rating: 5,
-    precio: 59.99,
-    categoria: "Aventura"
-  },
-  {
-    id: 3,
-    nombre: "Counter Strike 2",
-    imagen: "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/730/header.jpg?t=1745368595",
-    videoUrl: "https://www.youtube.com/embed/someVideoID1",
-    descripcion: "Durante las dos últimas décadas, Counter‑Strike ha proporcionado una experiencia competitiva de primer nivel para los millones de jugadores de todo el mundo que contribuyeron a darle forma. Ahora el próximo capítulo en la historia de CS está a punto de comenzar. Hablamos de Counter‑Strike 2.",
-    galeria: [
-      "https://url.imagen1.jpg",
-      "https://url.imagen2.jpg",
-      "https://url.imagen3.jpg"
-    ],
-    rating: 4.5,
-    precio: 19.99, // Cambiado, ya no es gratis
-    categoria: "FPS"
-  },
-  {
-    id: 4,
-    nombre: "Red Dead Redemption 2",
-    imagen: "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/1174180/header.jpg?t=1720558643",
-    videoUrl: "https://www.youtube.com/embed/someVideoID2",
-    descripcion: "Una historia épica del salvaje oeste con Arthur Morgan y la banda de Dutch van der Linde.",
-    galeria: [
-      "https://url.imagen4.jpg",
-      "https://url.imagen5.jpg",
-      "https://url.imagen6.jpg"
-    ],
-    rating: 5,
-    precio: 69.99,
-    categoria: "Aventura"
-  },
-  {
-    id: 5,
-    nombre: "Gang Beasts",
-    imagen: "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/285900/header.jpg?t=1732109683",
-    videoUrl: "https://www.youtube.com/embed/someVideoID1",
-    descripcion: "Gang Beasts es un desternillante juego multijugador de peleas absurdas entre personajes gelatinosos y gruñones.",
-    galeria: [
-      "https://url.imagen1.jpg",
-      "https://url.imagen2.jpg",
-      "https://url.imagen3.jpg"
-    ],
-    rating: 4.5,
-    precio: 14.99, // Cambiado, ya no es gratis
-    categoria: "Multijugador"
-  },
-  // Puedes agregar más juegos para llenar la cuadrícula 4x2 si lo deseas
-];
 
 // Tipos TypeScript para mejor tipado
 interface Juego {
@@ -105,7 +26,11 @@ const PaginaPrincipal: React.FC = () => {
   const navigate = useNavigate();
   const [menuCategoriasVisible, setMenuCategoriasVisible] = useState(false);
   
+  // Usar el hook de gestión de estado centralizado
+  const { getGamesForMainPage } = useGameState();
+  
   // Estados principales
+  const [juegos, setJuegos] = useState<Juego[]>([]);
   const [index, setIndex] = useState(0);
   const [carrito, setCarrito] = useState<ItemCarrito[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
@@ -119,14 +44,48 @@ const PaginaPrincipal: React.FC = () => {
   const [cargando, setCargando] = useState(false);
   const [mensaje, setMensaje] = useState('');
 
-  // Auto-avance del carrusel
+  // 🔄 Cargar juegos del estado centralizado
   useEffect(() => {
+    const loadGames = () => {
+      const gamesFromState = getGamesForMainPage();
+      setJuegos(gamesFromState);
+      
+      // Ajustar el índice del carrusel si es necesario
+      if (gamesFromState.length > 0 && index >= gamesFromState.length) {
+        setIndex(0);
+      }
+    };
+    
+    loadGames();
+    
+    // Escuchar cambios en el localStorage
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'juegos_unificados') {
+        loadGames();
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    
+    // También revisar cambios internos periódicamente
+    const interval = setInterval(loadGames, 2000); // Revisar cada 2 segundos
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      clearInterval(interval);
+    };
+  }, [getGamesForMainPage, index]);
+
+  // Auto-avance del carrusel (solo si hay juegos)
+  useEffect(() => {
+    if (juegos.length === 0) return;
+    
     const intervalo = setInterval(() => {
       setIndex(prevIndex => (prevIndex === juegos.length - 1 ? 0 : prevIndex + 1));
     }, 5000);
 
     return () => clearInterval(intervalo);
-  }, []);
+  }, [juegos.length]);
 
   // Persistir carrito en localStorage
   useEffect(() => {
@@ -142,12 +101,14 @@ const PaginaPrincipal: React.FC = () => {
 
   // Funciones del carrusel
   const handlePrev = useCallback(() => {
+    if (juegos.length === 0) return;
     setIndex(prevIndex => (prevIndex === 0 ? juegos.length - 1 : prevIndex - 1));
-  }, []);
+  }, [juegos.length]);
 
   const handleNext = useCallback(() => {
+    if (juegos.length === 0) return;
     setIndex(prevIndex => (prevIndex === juegos.length - 1 ? 0 : prevIndex + 1));
-  }, []);
+  }, [juegos.length]);
 
   // Función para mostrar mensajes temporales
   const mostrarMensaje = (texto: string, tipo: 'success' | 'error' | 'info' = 'info') => {
@@ -277,13 +238,13 @@ const PaginaPrincipal: React.FC = () => {
     });
 
     return resultado;
-  }, [busqueda, categoriaFiltro, ordenamiento]);
+  }, [busqueda, categoriaFiltro, ordenamiento, juegos]);
 
   // Obtener categorías únicas
   const categorias = useMemo(() => {
     const cats = Array.from(new Set(juegos.map(juego => juego.categoria)));
     return ['todas', ...cats];
-  }, []);
+  }, [juegos]);
 
   // Calcular totales del carrito
   const totalCarrito = useMemo(() => {
@@ -293,6 +254,13 @@ const PaginaPrincipal: React.FC = () => {
   const totalItems = useMemo(() => {
     return carrito.reduce((total, item) => total + item.cantidad, 0);
   }, [carrito]);
+
+  // Sincronizar juegos manualmente
+  const sincronizarJuegos = () => {
+    const gamesFromState = getGamesForMainPage();
+    setJuegos(gamesFromState);
+    mostrarMensaje('Catálogo sincronizado correctamente', 'success');
+  };
 
   return (
     <div className="pagina-principal">
@@ -304,7 +272,35 @@ const PaginaPrincipal: React.FC = () => {
       )}
 
       <header>
-        <h1>🎮 Catálogo de Juegos</h1>
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center',
+          marginBottom: '10px'
+        }}>
+          <h1>🎮 Catálogo de Juegos</h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <span style={{ fontSize: '14px', color: '#666' }}>
+              📊 {juegos.length} juegos disponibles
+            </span>
+            <button 
+              onClick={sincronizarJuegos}
+              style={{
+                padding: '5px 10px',
+                backgroundColor: '#007bff',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontSize: '12px'
+              }}
+              title="Sincronizar catálogo"
+            >
+              🔄 Sync
+            </button>
+          </div>
+        </div>
+        
         <nav className="navbar">
           <button>Explorar</button>
           <div style={{ position: 'relative', display: 'inline-block' }}>
@@ -431,125 +427,50 @@ const PaginaPrincipal: React.FC = () => {
       </header>
 
       {/* Carrusel mejorado */}
-      <section className="carousel">
-        <button 
-          className="carousel-btn prev" 
-          onClick={handlePrev}
-          aria-label="Juego anterior"
-        >
-          ⬅
-        </button>
-        
-        <div className="carousel-container">
-          <div className="carousel-image">
-            <img 
-              src={juegos[index].imagen} 
-              alt={juegos[index].nombre}
-              loading="lazy"
-            />
-            <div className="carousel-overlay">
-              <h3>{juegos[index].nombre}</h3>
-              <p className="descripcion">{juegos[index].descripcion}</p>
-              <div className="rating">
-                {'⭐'.repeat(Math.floor(juegos[index].rating))} 
-                <span>({juegos[index].rating})</span>
-              </div>
-              <p className="precio-carousel">
-                <span>${juegos[index].precio.toFixed(2)}</span>
-              </p>
-              <div className="carousel-actions">
-                <input
-                  type="number"
-                  min="1"
-                  max="10"
-                  value={cantidades[juegos[index].id] || 1}
-                  onChange={(e) => handleCantidadChange(juegos[index].id, parseInt(e.target.value) || 1)}
-                  className="cantidad-input"
-                />
-                <button 
-                  onClick={() => agregarAlCarrito(juegos[index])}
-                  className="boton-agregar"
-                >
-                  🛒 Agregar
-                </button>
-                <button 
-                  onClick={() => abrirDetalle(juegos[index])}
-                  className="boton-detalles"
-                >
-                  📋 Detalles
-                </button>
-              </div>
-            </div>
-          </div>
+      {juegos.length > 0 && (
+        <section className="carousel">
+          <button 
+            className="carousel-btn prev" 
+            onClick={handlePrev}
+            aria-label="Juego anterior"
+          >
+            ⬅
+          </button>
           
-          {/* Indicadores del carrusel */}
-          <div className="carousel-indicators">
-            {juegos.map((_, i) => (
-              <button
-                key={i}
-                className={`indicator ${i === index ? 'active' : ''}`}
-                onClick={() => setIndex(i)}
-                aria-label={`Ir al juego ${i + 1}`}
+          <div className="carousel-container">
+            <div className="carousel-image">
+              <img 
+                src={juegos[index]?.imagen || ''} 
+                alt={juegos[index]?.nombre || ''}
+                loading="lazy"
               />
-            ))}
-          </div>
-        </div>
-        
-        <button 
-          className="carousel-btn next" 
-          onClick={handleNext}
-          aria-label="Siguiente juego"
-        >
-          ➡
-        </button>
-      </section>
-
-      {/* Lista de juegos destacados */}
-      <section className="featured">
-        <h2>🔥 Juegos Destacados</h2>
-        <div className="games-grid">
-          {juegosFiltrados.map(juego => (
-            <div key={juego.id} className="game-card">
-              <div className="card-image">
-                <img src={juego.imagen} alt={juego.nombre} loading="lazy" />
-              </div>
-              
-              <div className="card-content">
-                <h3>{juego.nombre}</h3>
-                <p className="categoria">{juego.categoria}</p>
+              <div className="carousel-overlay">
+                <h3>{juegos[index]?.nombre}</h3>
+                <p className="descripcion">{juegos[index]?.descripcion}</p>
                 <div className="rating">
-                  {'⭐'.repeat(Math.floor(juego.rating))} 
-                  <span>({juego.rating})</span>
+                  {'⭐'.repeat(Math.floor(juegos[index]?.rating || 0))} 
+                  <span>({juegos[index]?.rating})</span>
                 </div>
-                <p className="precio">
-                  <span>${juego.precio.toFixed(2)}</span>
+                <p className="precio-carousel">
+                  <span>${juegos[index]?.precio.toFixed(2)}</span>
                 </p>
-                
-                <div className="card-actions">
-                  <div className="cantidad-control">
-                    <button 
-                      onClick={() => handleCantidadChange(juego.id, (cantidades[juego.id] || 1) - 1)}
-                      disabled={(cantidades[juego.id] || 1) <= 1}
-                    >
-                      -
-                    </button>
-                    <span>{cantidades[juego.id] || 1}</span>
-                    <button 
-                      onClick={() => handleCantidadChange(juego.id, (cantidades[juego.id] || 1) + 1)}
-                      disabled={(cantidades[juego.id] || 1) >= 10}
-                    >
-                      +
-                    </button>
-                  </div>
-                  
+                <div className="carousel-actions">
+                  <input
+                    type="number"
+                    min="1"
+                    max="10"
+                    value={cantidades[juegos[index]?.id] || 1}
+                    onChange={(e) => handleCantidadChange(juegos[index]?.id, parseInt(e.target.value) || 1)}
+                    className="cantidad-input"
+                  />
                   <button 
-                    onClick={() => agregarAlCarrito(juego)}
+                    onClick={() => agregarAlCarrito(juegos[index])}
                     className="boton-agregar"
                   >
                     🛒 Agregar
                   </button>
                   <button 
-                    onClick={() => abrirDetalle(juego)}
+                    onClick={() => abrirDetalle(juegos[index])}
                     className="boton-detalles"
                   >
                     📋 Detalles
@@ -557,9 +478,116 @@ const PaginaPrincipal: React.FC = () => {
                 </div>
               </div>
             </div>
-          ))}
-        </div>
-      </section>
+            
+            {/* Indicadores del carrusel */}
+            <div className="carousel-indicators">
+              {juegos.map((_, i) => (
+                <button
+                  key={i}
+                  className={`indicator ${i === index ? 'active' : ''}`}
+                  onClick={() => setIndex(i)}
+                  aria-label={`Ir al juego ${i + 1}`}
+                />
+              ))}
+            </div>
+          </div>
+          
+          <button 
+            className="carousel-btn next" 
+            onClick={handleNext}
+            aria-label="Siguiente juego"
+          >
+            ➡
+          </button>
+        </section>
+      )}
+
+      {/* Mensaje cuando no hay juegos */}
+      {juegos.length === 0 && (
+        <section style={{ 
+          textAlign: 'center', 
+          padding: '50px', 
+          background: '#f8f9fa', 
+          borderRadius: '10px',
+          margin: '20px 0'
+        }}>
+          <h3>📦 No hay juegos disponibles</h3>
+          <p>El catálogo está vacío. Los administradores pueden agregar juegos desde el panel de administración.</p>
+          <button 
+            onClick={sincronizarJuegos}
+            style={{
+              padding: '10px 20px',
+              backgroundColor: '#007bff',
+              color: 'white',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: 'pointer',
+              marginTop: '10px'
+            }}
+          >
+            🔄 Intentar sincronizar
+          </button>
+        </section>
+      )}
+
+      {/* Lista de juegos destacados */}
+      {juegos.length > 0 && (
+        <section className="featured">
+          <h2>🔥 Juegos Destacados</h2>
+          <div className="games-grid">
+            {juegosFiltrados.map(juego => (
+              <div key={juego.id} className="game-card">
+                <div className="card-image">
+                  <img src={juego.imagen} alt={juego.nombre} loading="lazy" />
+                </div>
+                
+                <div className="card-content">
+                  <h3>{juego.nombre}</h3>
+                  <p className="categoria">{juego.categoria}</p>
+                  <div className="rating">
+                    {'⭐'.repeat(Math.floor(juego.rating))} 
+                    <span>({juego.rating})</span>
+                  </div>
+                  <p className="precio">
+                    <span>${juego.precio.toFixed(2)}</span>
+                  </p>
+                  
+                  <div className="card-actions">
+                    <div className="cantidad-control">
+                      <button 
+                        onClick={() => handleCantidadChange(juego.id, (cantidades[juego.id] || 1) - 1)}
+                        disabled={(cantidades[juego.id] || 1) <= 1}
+                      >
+                        -
+                      </button>
+                      <span>{cantidades[juego.id] || 1}</span>
+                      <button 
+                        onClick={() => handleCantidadChange(juego.id, (cantidades[juego.id] || 1) + 1)}
+                        disabled={(cantidades[juego.id] || 1) >= 10}
+                      >
+                        +
+                      </button>
+                    </div>
+                    
+                    <button 
+                      onClick={() => agregarAlCarrito(juego)}
+                      className="boton-agregar"
+                    >
+                      🛒 Agregar
+                    </button>
+                    <button 
+                      onClick={() => abrirDetalle(juego)}
+                      className="boton-detalles"
+                    >
+                      📋 Detalles
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Carrito de compras mejorado */}
       <section className="cart">
