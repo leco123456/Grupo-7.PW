@@ -4,22 +4,22 @@ const ResetPass = () => {
   return (
     <div className="reset-pass-wrapper">
       <div className="containerreset">
-        <div className="logo">Logo</div>
-        <h2 className="reset-title">Reset your Password</h2>
+        <div className="logo">Nivel 100</div>
+        <h2 className="reset-title">Restablece tu contraseña</h2>
         <div className="form-box">
           <p>
-            Enter your user account’s verified email address and we will send you a password reset confirmation message.
+          Ingrese la dirección de correo electrónico de su cuenta de usuario y le enviaremos un mensaje de confirmación de restablecimiento de contraseña.
           </p>
 
-          <input type="email" placeholder="Enter your email" className="reset-input" />
+          <input type="email" placeholder="Ingrese su email" className="reset-input" />
 
-          <label className="reset-label">New password:</label>
-          <input type="password" placeholder="New password" className="reset-input" />
+          <label className="reset-label">Nueva contraseña:</label>
+          <input type="password" placeholder="Nueva contraseña" className="reset-input" />
 
-          <label className="reset-label">Confirm new password:</label>
-          <input type="password" placeholder="Confirm password" className="reset-input" />
+          <label className="reset-label">Confirmar contraseña:</label>
+          <input type="password" placeholder="Confirmar contraseña" className="reset-input" />
 
-          <button className="reset-btn">Send password reset email</button>
+          <button className="reset-btn">Confirmar</button>
         </div>
       </div>
     </div>

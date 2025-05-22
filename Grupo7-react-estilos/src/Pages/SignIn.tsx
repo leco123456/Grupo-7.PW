@@ -47,33 +47,33 @@ const SignIn = () => {
   return (
     <div className="signin-wrapper">
       <div className="container-signin">
-        <div className="logo">GameStore</div>
+        <div className="logo">Nivel 100</div>
 
-        <h2 className="signin-title">Sign in to GameStore</h2>
+        <h2 className="signin-title">Sign in</h2>
 
         <div className="form-box">
-          <label htmlFor="username">Username or email:</label>
+          <label htmlFor="username">Usuario</label>
           <input
             id="username"
             type="text"
             className="signin-input"
-            placeholder="Enter username"
+            placeholder="Ingresar usuario"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
           />
 
-          <label htmlFor="password">Password:</label>
+          <label htmlFor="password">Contraseña</label>
           <input
             id="password"
             type="password"
             className="signin-input"
-            placeholder="Enter password"
+            placeholder="Ingresar contraseña"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
 
           <div className="signin-link">
-            <a href="#">Forgot your password?</a>
+            <a href="#">Olvidaste tu contraseña?</a>
           </div>
 
           <button className="signin-btn" onClick={handleSignIn}>
@@ -81,13 +81,13 @@ const SignIn = () => {
           </button>
 
           <div className="signin-bottom-text">
-            New to GameStore?{' '}
+            No tienes cuenta?{' '}
             <span
               className="signup-link"
               onClick={handleNavigateToSignUp}
               style={{ cursor: 'pointer', color: '#007bff' }}
             >
-              Create an account
+              Crear cuenta
             </span>
           </div>
         </div>
