@@ -103,6 +103,7 @@ export interface ItemCarrito extends Juego {
 
 const PaginaPrincipal: React.FC = () => {
   const navigate = useNavigate();
+  const [menuCategoriasVisible, setMenuCategoriasVisible] = useState(false);
   
   // Estados principales
   const [index, setIndex] = useState(0);
@@ -306,7 +307,47 @@ const PaginaPrincipal: React.FC = () => {
         <h1>🎮 Catálogo de Juegos</h1>
         <nav className="navbar">
           <button>Explorar</button>
-          <button>Categorías</button>
+          <div style={{ position: 'relative', display: 'inline-block' }}>
+            <button
+              onClick={() => setMenuCategoriasVisible((v) => !v)}
+              className="dropdown-btn"
+            >
+              Categorías
+            </button>
+            {menuCategoriasVisible && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '100%',
+                  left: 0,
+                  background: '#222',
+                  border: '1px solid #444',
+                  zIndex: 10,
+                  minWidth: '180px',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                }}
+              >
+                <button
+                  style={{ width: '100%', color: '#fff', background: 'none', border: 'none', padding: '10px 16px', textAlign: 'left', cursor: 'pointer' }}
+                  onClick={() => {
+                    setMenuCategoriasVisible(false);
+                    navigate('/listavalor');
+                  }}
+                >
+                  Juegos mejor valorados
+                </button>
+                <button
+                  style={{ width: '100%', color: '#fff', background: 'none', border: 'none', padding: '10px 16px', textAlign: 'left', cursor: 'pointer' }}
+                  onClick={() => {
+                    setMenuCategoriasVisible(false);
+                    navigate('/listaventa');
+                  }}
+                >
+                  Juegos más vendidos
+                </button>
+              </div>
+            )}
+          </div>
           <button onClick={() => navigate('/paginaprincipal')} className="active">Inicio</button>
           <button>Plataformas</button>
           <button>Ofertas Especiales</button>

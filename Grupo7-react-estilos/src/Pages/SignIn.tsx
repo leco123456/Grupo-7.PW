@@ -8,6 +8,11 @@ const SignIn = () => {
   // Estados para los inputs controlados
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showResetModal, setShowResetModal] = useState(false);
+  const [resetUser, setResetUser] = useState('');
+  const [newPass, setNewPass] = useState('');
+  const [confirmNewPass, setConfirmNewPass] = useState('');
+  const [resetMessage, setResetMessage] = useState('');
 
   const handleSignIn = () => {
     // Caso especial: acceso admin fijo
@@ -36,6 +41,38 @@ const SignIn = () => {
 
   const handleNavigateToSignUp = () => {
     navigate('/signup');
+  };
+
+  const handleResetPassword = () => {
+    // Simulación de verificación y cambio de contraseña
+    if (!resetUser || !newPass || !confirmNewPass) {
+      setResetMessage('Por favor, completa todos los campos.');
+      return;
+    }
+    if (newPass !== confirmNewPass) {
+      setResetMessage('Las contraseñas no coinciden.');
+      return;
+    }
+    // Simula búsqueda y cambio en localStorage
+    const usuarios = JSON.parse(localStorage.getItem('usuarios') || '[]');
+    const userIndex = usuarios.findIndex(
+      (user: { username: string; email: string }) =>
+        user.username === resetUser || user.email === resetUser
+    );
+    if (userIndex === -1) {
+      setResetMessage('Usuario o email no encontrado.');
+      return;
+    }
+    usuarios[userIndex].password = newPass;
+    localStorage.setItem('usuarios', JSON.stringify(usuarios));
+    setResetMessage('¡Contraseña restablecida con éxito!');
+    setTimeout(() => {
+      setShowResetModal(false);
+      setResetMessage('');
+      setResetUser('');
+      setNewPass('');
+      setConfirmNewPass('');
+    }, 1500);
   };
 
   return (
@@ -67,7 +104,12 @@ const SignIn = () => {
           />
 
           <div className="signin-link">
-            <a href="#">Olvidaste tu contraseña?</a>
+            <span
+              style={{ color: '#007bff', cursor: 'pointer' }}
+              onClick={() => setShowResetModal(true)}
+            >
+              Olvidaste tu contraseña?
+            </span>
           </div>
 
           <button className="signin-btn" onClick={handleSignIn}>
@@ -86,6 +128,48 @@ const SignIn = () => {
           </div>
         </div>
       </div>
+
+      {/* Modal de reset password */}
+      {showResetModal && (
+        <div className="modal-reset-overlay">
+          <div className="modal-reset">
+            <h3>Reset your password</h3>
+            <p>
+              Enter your user account's verified email address and we will send you a password reset confirmation message.
+            </p>
+            <input
+              type="text"
+              placeholder="Usuario o email"
+              value={resetUser}
+              onChange={(e) => setResetUser(e.target.value)}
+              style={{ width: '100%', marginBottom: 8 }}
+            />
+            <input
+              type="password"
+              placeholder="New password"
+              value={newPass}
+              onChange={(e) => setNewPass(e.target.value)}
+              style={{ width: '100%', marginBottom: 8 }}
+            />
+            <input
+              type="password"
+              placeholder="Confirm new password"
+              value={confirmNewPass}
+              onChange={(e) => setConfirmNewPass(e.target.value)}
+              style={{ width: '100%', marginBottom: 8 }}
+            />
+            {resetMessage && (
+              <div style={{ color: resetMessage.includes('éxito') ? 'green' : 'red', marginBottom: 8 }}>
+                {resetMessage}
+              </div>
+            )}
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button onClick={handleResetPassword}>Send password reset email</button>
+              <button onClick={() => setShowResetModal(false)}>Cerrar</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

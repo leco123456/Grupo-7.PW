@@ -15,18 +15,70 @@ interface Game {
   date: string;
 }
 
+const juegosIniciales: Game[] = [
+  {
+    name: "Sven Co-op",
+    description: "Sven Co-op es un mod cooperativo para Half-Life que te permite jugar en equipo con amigos.",
+    category: "Cooperativo",
+    price: 9.99,
+    discount: 0,
+    photo: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/225840/header.jpg?t=1735034103",
+    date: "2023-01-01"
+  },
+  {
+    name: "God of War",
+    description: "Una épica aventura de Kratos y Atreus en la mitología nórdica.",
+    category: "Aventura",
+    price: 59.99,
+    discount: 0,
+    photo: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1593500/header.jpg?t=1729030762",
+    date: "2023-01-02"
+  },
+  {
+    name: "Counter Strike 2",
+    description: "Durante las dos últimas décadas, Counter‑Strike ha proporcionado una experiencia competitiva de primer nivel...",
+    category: "FPS",
+    price: 19.99,
+    discount: 0,
+    photo: "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/730/header.jpg?t=1745368595",
+    date: "2023-01-03"
+  },
+  {
+    name: "Red Dead Redemption 2",
+    description: "Una historia épica del salvaje oeste con Arthur Morgan y la banda de Dutch van der Linde.",
+    category: "Aventura",
+    price: 69.99,
+    discount: 0,
+    photo: "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/1174180/header.jpg?t=1720558643",
+    date: "2023-01-04"
+  },
+  {
+    name: "Gang Beasts",
+    description: "Gang Beasts es un desternillante juego multijugador de peleas absurdas entre personajes gelatinosos y gruñones.",
+    category: "Multijugador",
+    price: 14.99,
+    discount: 0,
+    photo: "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/285900/header.jpg?t=1732109683",
+    date: "2023-01-05"
+  }
+  // ...agrega más si tienes
+];
+
 const AdminJuegos = () => {
   const [juegos, setJuegos] = useState<Game[]>(() => {
     const juegosGuardados = localStorage.getItem('juegos');
     if (juegosGuardados) {
       try {
         const juegosParseados = JSON.parse(juegosGuardados);
-        if (Array.isArray(juegosParseados)) {
+        // Si está vacío, vuelve a cargar los juegos iniciales
+        if (Array.isArray(juegosParseados) && juegosParseados.length > 0) {
           return juegosParseados;
         }
       } catch (e) {}
     }
-    return [];
+    // Si no hay juegos o están vacíos, inicializa con los juegos por defecto
+    localStorage.setItem('juegos', JSON.stringify(juegosIniciales));
+    return juegosIniciales;
   });
 
   const [juegoEnEdicion, setJuegoEnEdicion] = useState<Game | null>(null);
