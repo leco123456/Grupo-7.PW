@@ -4,7 +4,7 @@ import EditarJuego from './EditarJuego';
 import EliminarJuego from './EliminarJuego';
 import { FaEdit, FaTrash, FaSync } from 'react-icons/fa';
 import { useGameState } from './gameStateManager';
-import './AdminJuegos.css';
+import '../estilos/AdminJuegos.css';
 
 // INTERFAZ ACTUALIZADA - Ahora incluye videoUrl
 interface Game {

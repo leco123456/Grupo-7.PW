@@ -1,4 +1,4 @@
-import './ListaValor.css';
+import '../estilos/ListaValor.css';
 const ListaValor = () => {
     return <div>
   <h1>Juegos Más Valorados</h1>

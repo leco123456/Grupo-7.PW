@@ -1,4 +1,4 @@
-import './Resena.css';
+import '../estilos/Resena.css';
 const Reseña = () => {
   return (
     <div className="modalresena">

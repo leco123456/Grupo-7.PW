@@ -1,4 +1,4 @@
-import './ResetPass.css'
+import '../estilos/ResetPass.css'
 
 const ResetPass = () => {
   return (

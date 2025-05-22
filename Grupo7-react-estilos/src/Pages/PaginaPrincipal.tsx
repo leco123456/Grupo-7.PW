@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import ConfirmarOrden from './Confirmarorden';
 import Detalle from './Detalle';
 import { useGameState } from './gameStateManager';
-import './PaginaPrincipal.css';
+import '../estilos/PaginaPrincipal.css';
 
 // Tipos TypeScript para mejor tipado
 interface Juego {

@@ -1,58 +1,69 @@
-import './SignUp.css';
 import { useState } from 'react';
+import '../estilos/SignUp.css';
 
 const SignUp = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
   const [country, setCountry] = useState('');
+  const [modal, setModal] = useState({ show: false, message: '', type: '' });
+
+  const showModal = (message: string, type: string = 'error') => {
+    setModal({ show: true, message, type });
+  };
+
+  const closeModal = () => {
+    setModal({ show: false, message: '', type: '' });
+    if (modal.type === 'success') {
+      window.location.href = '/';
+    }
+  };
+
+  const goToSignIn = () => {
+    window.location.href = '/';
+  };
 
   const handleContinue = () => {
     if (!email.includes('@')) {
-      alert('Please enter a valid email address with "@"');
+      showModal('Please enter a valid email address with "@"');
       return;
     }
 
     if (password.length < 8) {
-      alert('Password must be at least 8 characters');
+      showModal('Password must be at least 8 characters');
       return;
     }
 
     if (!username) {
-      alert('Please enter a username');
+      showModal('Please enter a username');
       return;
     }
 
-    // Crear nuevo usuario con rol 'user' por defecto
     const nuevoUsuario = {
       email,
       password,
       username,
       country,
-      role: 'user',  // Siempre 'user' al crear desde signup
+      role: 'user',
     };
 
-    // Obtener arreglo de usuarios existentes o crear uno nuevo
     const usuarios = JSON.parse(localStorage.getItem('usuarios') || '[]');
 
-    // Opcional: verificar que no exista un usuario con mismo email o username
     const existeUsuario = usuarios.some(
       (user: { email: string; username: string }) =>
         user.email === email || user.username === username
     );
 
     if (existeUsuario) {
-      alert('Email o username ya están registrados');
+      showModal('Email or username already registered');
       return;
     }
 
-    // Agregar nuevo usuario y guardar
     usuarios.push(nuevoUsuario);
     localStorage.setItem('usuarios', JSON.stringify(usuarios));
 
-    alert('Account created and data saved to localStorage ✅');
+    showModal('Account created successfully! ✅', 'success');
 
-    // Limpiar campos (opcional)
     setEmail('');
     setPassword('');
     setUsername('');
@@ -128,6 +139,27 @@ const SignUp = () => {
           <button className="signup-btn" onClick={handleContinue}>Continue →</button>
         </div>
       </div>
+
+      {/* Modal */}
+      {modal.show && (
+        <div className="modal-signup-overlay">
+          <div className="modal-signup">
+            <button className="close-btn" onClick={goToSignIn}>×</button>
+            <div className="modal-icon">
+              {modal.type === 'success' ? '✅' : '⚠️'}
+            </div>
+            <h3>{modal.type === 'success' ? 'Success!' : 'Error'}</h3>
+            <p className={`modal-signup-message ${modal.type}`}>
+              {modal.message}
+            </p>
+            <div className="modal-signup-actions">
+              <button onClick={closeModal}>
+                {modal.type === 'success' ? 'Go to Sign In' : 'Try Again'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

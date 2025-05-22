@@ -1,5 +1,5 @@
 import React from 'react';
-import './Detalle.css';
+import '../estilos/Detalle.css';
 
 const Detalle = ({ juego, visible, onClose }: any) => {
   if (!visible || !juego) return null;

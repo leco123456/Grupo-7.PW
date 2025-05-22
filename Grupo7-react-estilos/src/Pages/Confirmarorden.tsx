@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './ConfirmarOrden.css';
+import '../estilos/ConfirmarOrden.css';
 import type { ItemCarrito } from './PaginaPrincipal'; // o desde donde definas ItemCarrito
 
 interface ConfirmarOrdenProps {
