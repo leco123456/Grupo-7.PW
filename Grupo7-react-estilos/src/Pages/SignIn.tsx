@@ -14,10 +14,9 @@ const SignIn = () => {
     if (username === 'admin' && password === 'admin') {
       localStorage.setItem('userRole', 'admin');
       alert('Bienvenido admin, rol: admin');
-      navigate('/paginaprincipal'); // Cambio aquí
+      navigate('/paginaprincipal'); // Cambiado a paginaprincipal
       return;
     }
-    
 
     const usuarios = JSON.parse(localStorage.getItem('usuarios') || '[]');
 
@@ -29,12 +28,7 @@ const SignIn = () => {
     if (usuarioEncontrado) {
       localStorage.setItem('userRole', usuarioEncontrado.role || 'user');
       alert(`Bienvenido ${usuarioEncontrado.username}, rol: ${usuarioEncontrado.role || 'user'}`);
-
-      if (usuarioEncontrado.role === 'admin') {
-        navigate('/adminjuegos');
-      } else {
-        navigate('/paginaprincipal');
-      }
+      navigate('/paginaprincipal'); // Siempre navega a paginaprincipal
     } else {
       alert('Usuario o contraseña incorrectos');
     }

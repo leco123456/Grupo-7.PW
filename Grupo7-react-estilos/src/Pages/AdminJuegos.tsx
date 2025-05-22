@@ -16,7 +16,19 @@ interface Game {
 }
 
 const AdminJuegos = () => {
-  const [juegos, setJuegos] = useState<Game[]>([]);
+  const [juegos, setJuegos] = useState<Game[]>(() => {
+    const juegosGuardados = localStorage.getItem('juegos');
+    if (juegosGuardados) {
+      try {
+        const juegosParseados = JSON.parse(juegosGuardados);
+        if (Array.isArray(juegosParseados)) {
+          return juegosParseados;
+        }
+      } catch (e) {}
+    }
+    return [];
+  });
+
   const [juegoEnEdicion, setJuegoEnEdicion] = useState<Game | null>(null);
   const [indexEnEdicion, setIndexEnEdicion] = useState<number | null>(null);
   const [juegoAEliminar, setJuegoAEliminar] = useState<Game | null>(null);
@@ -32,12 +44,6 @@ const AdminJuegos = () => {
       alert('Acceso denegado. Solo para administradores.');
       window.location.href = '/';
     }
-  }, []);
-
-  // 📥 Cargar juegos al iniciar
-  useEffect(() => {
-    const juegosGuardados = localStorage.getItem('juegos');
-    if (juegosGuardados) setJuegos(JSON.parse(juegosGuardados));
   }, []);
 
   // 💾 Guardar juegos cada vez que cambian
@@ -82,7 +88,7 @@ const AdminJuegos = () => {
 
   const eliminarJuego = () => {
     if (juegoAEliminar) {
-      const actualizados = juegos.filter(j => j.name !== juegoAEliminar.name);
+      const actualizados = juegos.filter(j => j.date !== juegoAEliminar.date);
       setJuegos(actualizados);
     }
     setMostrarEliminar(false);

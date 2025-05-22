@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 
-interface Game {
+// Define la interfaz aquí o impórtala desde un archivo común
+export interface Game {
   name: string;
   description: string;
   category: string;
@@ -8,9 +9,10 @@ interface Game {
   discount: number;
   photo: string;
   date: string;
+  // Agrega otros campos si los necesitas (rating, videoUrl, etc.)
 }
 
-interface EditarJuegoProps {
+export interface EditarJuegoProps {
   juego: Game;
   onClose: () => void;
   onSave: (juegoEditado: Game) => void;
@@ -24,6 +26,7 @@ const EditarJuego = ({ juego, onClose, onSave }: EditarJuegoProps) => {
     setFormData(juego);
   }, [juego]);
 
+  // Mapea los nombres de los campos del formulario a los de la interfaz Juego
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -40,19 +43,19 @@ const EditarJuego = ({ juego, onClose, onSave }: EditarJuegoProps) => {
   return (
     <div className="modal">
       <div className="modal-content">
-        <h3>Edit Game</h3>
+        <h3>Editar Juego</h3>
         <form onSubmit={handleSubmit}>
           <input
             name="name"
             type="text"
-            placeholder="Name"
+            placeholder="Nombre"
             required
             value={formData.name}
             onChange={handleChange}
           />
           <textarea
             name="description"
-            placeholder="Description"
+            placeholder="Descripción"
             required
             value={formData.description}
             onChange={handleChange}
@@ -63,16 +66,18 @@ const EditarJuego = ({ juego, onClose, onSave }: EditarJuegoProps) => {
             value={formData.category}
             onChange={handleChange}
           >
-            <option value="">Select category</option>
-            <option value="Action">Action</option>
+            <option value="">Selecciona categoría</option>
+            <option value="Acción">Acción</option>
             <option value="RPG">RPG</option>
             <option value="Horror">Horror</option>
             <option value="Shooter">Shooter</option>
+            <option value="Aventura">Aventura</option>
+            <option value="Multijugador">Multijugador</option>
           </select>
           <input
             name="price"
             type="number"
-            placeholder="Price"
+            placeholder="Precio"
             required
             value={formData.price}
             onChange={handleChange}
@@ -80,7 +85,7 @@ const EditarJuego = ({ juego, onClose, onSave }: EditarJuegoProps) => {
           <input
             name="discount"
             type="number"
-            placeholder="Discount (%)"
+            placeholder="Descuento (%)"
             required
             value={formData.discount}
             onChange={handleChange}
@@ -88,16 +93,17 @@ const EditarJuego = ({ juego, onClose, onSave }: EditarJuegoProps) => {
           <input
             name="photo"
             type="text"
-            placeholder="Photo URL"
+            placeholder="URL de la imagen"
             required
             value={formData.photo}
             onChange={handleChange}
           />
+          {/* Si tienes campos extra como videoUrl o rating, agrégalos aquí */}
           <div className="modal-buttons">
             <button type="button" onClick={onClose}>
-              Cancel
+              Cancelar
             </button>
-            <button type="submit">Save Changes</button>
+            <button type="submit">Guardar Cambios</button>
           </div>
         </form>
       </div>
