@@ -1,35 +1,75 @@
-// PaginaPrincipal.tsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ConfirmarOrden from './Confirmarorden';
+import Detalle from './Detalle';
 import './PaginaPrincipal.css';
 
 const juegos = [
   {
     id: 1,
     nombre: "Sven Co-op",
-    imagen: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/225840/header.jpg?t=1735034103"
+    imagen: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/225840/header.jpg?t=1735034103",
+    videoUrl: "https://www.youtube.com/embed/someVideoID1",
+    descripcion: "Sven Co-op es un mod cooperativo para Half-Life que te permite jugar en equipo con amigos.",
+    galeria: [
+      "https://url.imagen1.jpg",
+      "https://url.imagen2.jpg",
+      "https://url.imagen3.jpg"
+    ],
+    rating: 4.5,
   },
   {
     id: 2,
     nombre: "God of War",
-    imagen: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1593500/header.jpg?t=1729030762"
+    imagen: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1593500/header.jpg?t=1729030762",
+    videoUrl: "https://www.youtube.com/embed/K0u_kAWLJOA",
+    descripcion: "Una épica aventura de Kratos y Atreus en la mitología nórdica.",
+    galeria: [
+      "https://url.imagen4.jpg",
+      "https://url.imagen5.jpg",
+      "https://url.imagen6.jpg"
+    ],
+    rating: 5,
   },
   {
     id: 3,
-    nombre: "Apex Legends™",
-    imagen: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1172470/b7e2d0c4b5f34b6751269c359070f706ff6d59fe/header.jpg?t=1746554828"
+    nombre: "Counter Strike 2",
+    imagen: "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/730/header.jpg?t=1745368595",
+    videoUrl: "https://www.youtube.com/embed/someVideoID1",
+    descripcion: "Durante las dos últimas décadas, Counter‑Strike ha proporcionado una experiencia competitiva de primer nivel para los millones de jugadores de todo el mundo que contribuyeron a darle forma. Ahora el próximo capítulo en la historia de CS está a punto de comenzar. Hablamos de Counter‑Strike 2.",
+    galeria: [
+      "https://url.imagen1.jpg",
+      "https://url.imagen2.jpg",
+      "https://url.imagen3.jpg"
+    ],
+    rating: 4.5,
   },
   {
     id: 4,
-    nombre: "Elden Ring",
-    imagen: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1245620/header.jpg?t=1744748041"
+    nombre: "Red Dead Redemption 2",
+    imagen: "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/1174180/header.jpg?t=1720558643",
+    videoUrl: "https://www.youtube.com/embed/someVideoID2",
+    descripcion: "Una épica aventura de Kratos y Atreus en la mitología nórdica.",
+    galeria: [
+      "https://url.imagen4.jpg",
+      "https://url.imagen5.jpg",
+      "https://url.imagen6.jpg"
+    ],
+    rating: 5,
   },
   {
     id: 5,
-    nombre: "Marvel Rivals",
-    imagen: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2767030/15bae4d173dc131df80b8e853fb5dc4c765872d6/header.jpg?t=1747650710"
-  }
+    nombre: "Gang Beasts",
+    imagen: "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/285900/header.jpg?t=1732109683",
+    videoUrl: "https://www.youtube.com/embed/someVideoID1",
+    descripcion: "Gang Beasts es un desternillante juego multijugador de peleas absurdas entre personajes gelatinosos y gruñones.",
+    galeria: [
+      "https://url.imagen1.jpg",
+      "https://url.imagen2.jpg",
+      "https://url.imagen3.jpg"
+    ],
+    rating: 4.5,
+  },
 ];
 
 const PaginaPrincipal = () => {
@@ -37,6 +77,7 @@ const PaginaPrincipal = () => {
   const [index, setIndex] = useState(0);
   const [carrito, setCarrito] = useState<any[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
+  const [detalleJuego, setDetalleJuego] = useState<any>(null);
 
   const handlePrev = () => {
     setIndex((prevIndex) => (prevIndex === 0 ? juegos.length - 1 : prevIndex - 1));
@@ -60,7 +101,7 @@ const PaginaPrincipal = () => {
     if (confirmacion) setCarrito([]);
   };
 
-  const abrirModal = () => {
+  const abrirModalOrden = () => {
     if (carrito.length === 0) {
       alert("El carrito está vacío. Agrega al menos un juego para confirmar la orden.");
       return;
@@ -68,8 +109,14 @@ const PaginaPrincipal = () => {
     setModalVisible(true);
   };
 
-  const cerrarModal = () => {
-    setModalVisible(false);
+  const cerrarModalOrden = () => setModalVisible(false);
+
+  const abrirDetalle = (juego: any) => {
+    setDetalleJuego(juego);
+  };
+
+  const cerrarDetalle = () => {
+    setDetalleJuego(null);
   };
 
   return (
@@ -103,7 +150,7 @@ const PaginaPrincipal = () => {
             <img src={juegos[index].imagen} alt={juegos[index].nombre} />
             <p>{juegos[index].nombre}</p>
             <button onClick={() => agregarAlCarrito(juegos[index])}>Agregar</button>
-            <button>Detalles</button>
+            <button onClick={() => abrirDetalle(juegos[index])}>Detalles</button>
           </div>
         </div>
         <button className="carousel-btn" onClick={handleNext}>➡</button>
@@ -117,7 +164,7 @@ const PaginaPrincipal = () => {
               <img src={juego.imagen} alt={juego.nombre} />
               <h3>{juego.nombre}</h3>
               <button onClick={() => agregarAlCarrito(juego)}>Agregar</button>
-              <button>Detalles</button>
+              <button onClick={() => abrirDetalle(juego)}>Detalles</button>
             </div>
           ))}
         </div>
@@ -138,14 +185,16 @@ const PaginaPrincipal = () => {
           )}
         </div>
         <div className="cart-actions">
-          <button onClick={abrirModal}>✔ Confirmar Orden</button>
+          <button onClick={abrirModalOrden}>✔ Confirmar Orden</button>
           <button onClick={cancelarCarrito}>✖ Cancelar Orden</button>
         </div>
       </section>
 
-      <ConfirmarOrden visible={modalVisible} onClose={cerrarModal} />
+      <ConfirmarOrden visible={modalVisible} onClose={cerrarModalOrden} />
+      <Detalle juego={detalleJuego} visible={!!detalleJuego} onClose={cerrarDetalle} />
     </div>
   );
 };
 
 export default PaginaPrincipal;
+
