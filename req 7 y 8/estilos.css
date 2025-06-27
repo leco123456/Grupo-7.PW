@@ -1,0 +1,30 @@
+.juego-lista li {
+    background: white;
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .juego-lista li img {
+    width: 90px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 4px;
+  }
+
+  .ranking {
+    font-size: 1.2rem;
+    font-weight: bold;
+    background: #333;
+    color: #fff;
+    width: 30px;
+    height: 30px;
+    border-radius: 15%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }

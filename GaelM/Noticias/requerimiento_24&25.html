@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Noticias</title>
+  <link rel="stylesheet" href="estilos.css" />
+</head>
+<body>
+  <main class="content">
+    <div class="header">
+      <h2>Noticias</h2>
+      <button id="addBtn">+ Agregar</button>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Id</th>
+          <th>Foto</th>
+          <th>Nombre</th>
+          <th>Descripcion</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="ListaNoticias">
+        <tr>
+            <td>1</td>
+            <td><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Nintendo_Switch_2_logo.svg/250px-Nintendo_Switch_2_logo.svg.png"></td>
+            <td>Switch 2 revelada</td>
+            <td>Nintendo acaba de revelar la nueva consola Switch 2..</td>
+            <td class="accion">
+              <button class="editBtn">Editar</button>
+              <button class="elimBtn">Eliminar</button>
+            </td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td><img src="https://cdn.atomix.vg/wp-content/uploads/2020/01/ps-logo.jpg"></td>
+            <td>La PS5 baja en ventas</td>
+            <td>Sony ha reportado que este mes las ventas de las PS5 han bajado..</td>
+            <td class="accion">
+              <button class="editBtn">Editar</button>
+              <button class="elimBtn">Eliminar</button>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
